@@ -1,0 +1,4014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GSMS — Government Officer Portal</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f4efe9;--bg2:#ede8e1;--card:#faf7f3;
+  --teal:#1e6b6b;--teal-d:#134646;--teal-l:#e4f2f2;--teal-ll:#c8e8e8;
+  --amber:#c97a06;--amber-l:#fef3c7;--amber-ll:#fde68a;
+  --olive:#3d5226;--olive-l:#eaf0e1;
+  --red:#a91919;--red-l:#fde8e8;
+  --green:#15622e;--green-l:#dcf3e5;
+  --grey:#687080;--grey-l:#f0f0ee;--grey-ll:#e2e2de;
+  --border:#d8d0c4;--border-l:#e8e2da;
+  --text:#1a2230;--text-m:#485060;--text-s:#6b7585;
+  --shadow:0 1px 4px rgba(0,0,0,0.07),0 2px 8px rgba(0,0,0,0.05);
+  --shadow-m:0 4px 16px rgba(0,0,0,0.11);
+}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;}
+
+/* ── STRIP ── */
+.strip{background:var(--teal-d);color:rgba(255,255,255,0.65);font-size:10.5px;padding:3px 20px;display:flex;justify-content:space-between;}
+
+/* ── HEADER ── */
+.header{background:var(--teal);color:#fff;padding:0 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(0,0,0,0.18);}
+.h-brand{display:flex;align-items:center;gap:13px;padding:11px 0;}
+.emblem{width:46px;height:46px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 1px 6px rgba(0,0,0,0.15);}
+.emblem svg{width:30px;height:30px;}
+.h-title{font-size:15.5px;font-weight:700;line-height:1.2;}
+.h-sub{font-size:10px;opacity:0.7;margin-top:1px;}
+.h-right{display:flex;align-items:center;gap:10px;}
+#officer-badge{display:none;background:rgba(255,255,255,0.13);border:1px solid rgba(255,255,255,0.22);border-radius:5px;padding:6px 13px;font-size:11.5px;text-align:right;}
+#officer-badge.show{display:block;}
+#officer-badge .ob-name{font-weight:600;color:#fde68a;font-size:12.5px;}
+#officer-badge .ob-role{opacity:0.75;font-size:10.5px;}
+.logout-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);color:#fff;padding:6px 13px;border-radius:4px;font-size:11.5px;cursor:pointer;display:none;}
+.logout-btn:hover{background:rgba(255,255,255,0.2);}
+.logout-btn.show{display:block;}
+
+/* ── NAV ── */
+.nav-wrap{background:var(--teal-d);border-bottom:1px solid rgba(255,255,255,0.07);}
+.nav{display:flex;padding:0 20px;overflow-x:auto;}
+.nav-tab{color:rgba(255,255,255,0.55);padding:10px 16px;font-size:12px;font-weight:500;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:color 0.15s;user-select:none;}
+.nav-tab:hover{color:rgba(255,255,255,0.88);}
+.nav-tab.active{color:#fff;border-bottom-color:var(--amber);}
+.nav-tab.locked{opacity:0.28;cursor:not-allowed;pointer-events:none;}
+
+/* ── MAIN ── */
+.main{max-width:1300px;margin:0 auto;padding:20px 20px;}
+.page{display:none;}.page.active{display:block;}
+
+/* ── PG HEAD ── */
+.pg-head{margin-bottom:18px;}
+.pg-head h2{font-size:18px;font-weight:700;color:var(--teal-d);}
+.pg-head p{color:var(--grey);font-size:12px;margin-top:3px;}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:7px;box-shadow:var(--shadow);}
+.card-head{padding:12px 16px;border-bottom:1px solid var(--border-l);display:flex;align-items:center;justify-content:space-between;}
+.card-head h3{font-size:13px;font-weight:600;color:var(--teal-d);}
+.card-body{padding:16px;}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+
+/* ── STAT CARDS ── */
+.stat{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:14px 16px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.stat.c-teal::before{background:var(--teal);}
+.stat.c-amber::before{background:var(--amber);}
+.stat.c-olive::before{background:var(--olive);}
+.stat.c-red::before{background:var(--red);}
+.stat.c-green::before{background:var(--green);}
+.stat-num{font-size:26px;font-weight:700;line-height:1;margin:4px 0 2px;}
+.stat.c-teal .stat-num{color:var(--teal);}
+.stat.c-amber .stat-num{color:var(--amber);}
+.stat.c-olive .stat-num{color:var(--olive);}
+.stat.c-red .stat-num{color:var(--red);}
+.stat.c-green .stat-num{color:var(--green);}
+.stat-label{font-size:10.5px;color:var(--grey);font-weight:500;text-transform:uppercase;letter-spacing:0.5px;}
+.stat-sub{font-size:11px;color:var(--text-s);margin-top:4px;}
+.stat-icon{position:absolute;right:12px;top:12px;font-size:26px;opacity:0.1;}
+
+/* ── BADGES / PILLS ── */
+.badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;display:inline-block;}
+.b-sc{background:#fce7f3;color:#9d174d;}
+.b-st{background:#ede9fe;color:#5b21b6;}
+.b-obc{background:#e0f2fe;color:#075985;}
+.b-gen{background:var(--grey-l);color:var(--grey);}
+.b-rural{background:var(--olive-l);color:var(--olive);}
+.b-urban{background:var(--teal-l);color:var(--teal);}
+
+.pill{font-size:10.5px;padding:3px 9px;border-radius:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
+.pill::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;}
+.p-submitted{background:#dbeafe;color:#1d4ed8;}
+.p-review{background:var(--amber-l);color:#92400e;}
+.p-approved{background:var(--green-l);color:var(--green);}
+.p-disbursed{background:var(--teal-l);color:var(--teal-d);}
+.p-rejected{background:var(--red-l);color:var(--red);}
+
+/* ── TABLES ── */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{background:var(--teal-d);color:#fff;padding:9px 11px;text-align:left;font-size:11px;font-weight:500;letter-spacing:0.2px;white-space:nowrap;}
+td{padding:8px 11px;border-bottom:1px solid var(--border-l);color:var(--text-m);vertical-align:middle;}
+tr:hover td{background:var(--bg2);}
+tr:last-child td{border-bottom:none;}
+.td-bold{font-weight:600;color:var(--text);}
+.td-mono{font-family:monospace;font-size:11px;}
+
+/* ── FORMS ── */
+.form-row{display:grid;gap:12px;margin-bottom:12px;}
+.fr2{grid-template-columns:1fr 1fr;}
+.fr3{grid-template-columns:1fr 1fr 1fr;}
+.fr4{grid-template-columns:1fr 1fr 1fr 1fr;}
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fg label{font-size:11.5px;font-weight:500;color:var(--text-m);}
+.fg input,.fg select,.fg textarea{
+  border:1px solid var(--border);border-radius:4px;
+  padding:7px 9px;font-size:12.5px;font-family:inherit;
+  color:var(--text);background:#fff;outline:none;
+  transition:border-color 0.15s,box-shadow 0.15s;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--teal);box-shadow:0 0 0 2px rgba(30,107,107,0.12);}
+.fg .hint{font-size:10.5px;color:var(--text-s);}
+.req{color:var(--red);}
+
+/* ── BUTTONS ── */
+.btn{padding:7px 16px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;}
+.btn-teal{background:var(--teal);color:#fff;}.btn-teal:hover{background:var(--teal-d);}
+.btn-amber{background:var(--amber);color:#fff;}.btn-amber:hover{background:#a86205;}
+.btn-outline{background:#fff;color:var(--teal);border:1px solid var(--teal);}.btn-outline:hover{background:var(--teal-l);}
+.btn-red{background:var(--red-l);color:var(--red);border:1px solid #f5a0a0;}.btn-red:hover{background:var(--red);color:#fff;}
+.btn-green{background:var(--green-l);color:var(--green);border:1px solid #86efac;}.btn-green:hover{background:var(--green);color:#fff;}
+.btn-sm{padding:4px 10px;font-size:11px;}
+.btn-xs{padding:3px 8px;font-size:10.5px;}
+
+/* ── FILTERS BOX ── */
+.filter-box{background:var(--card);border:1px solid var(--border);border-radius:7px;margin-bottom:14px;box-shadow:var(--shadow);}
+.filter-toggle{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+.filter-toggle span{font-size:12px;font-weight:600;color:var(--teal-d);display:flex;align-items:center;gap:6px;}
+.filter-toggle .arr{font-size:10px;color:var(--grey);transition:transform 0.2s;}
+.filter-toggle.open .arr{transform:rotate(180deg);}
+.filter-inner{padding:12px 14px 14px;border-top:1px solid var(--border-l);display:none;}
+.filter-inner.open{display:block;}
+.filter-actions{display:flex;gap:8px;margin-top:12px;}
+.active-filters{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px;border-top:1px solid var(--border-l);}
+.active-filters:empty{display:none;}
+.filter-chip{background:var(--teal-l);color:var(--teal-d);border:1px solid var(--teal-ll);font-size:10.5px;padding:2px 8px;border-radius:10px;display:flex;align-items:center;gap:5px;}
+.filter-chip button{background:none;border:none;cursor:pointer;color:var(--teal);font-size:12px;line-height:1;padding:0;}
+
+/* ── FUND BAR ── */
+.fund-bar-wrap{margin-bottom:10px;}
+.fund-bar-label{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px;}
+.fund-bar-name{font-weight:500;color:var(--text);}
+.fund-bar-pct{color:var(--grey);}
+.fund-bar-track{height:9px;background:var(--grey-ll);border-radius:4px;overflow:hidden;}
+.fund-fill{height:100%;border-radius:4px;transition:width 0.5s ease;}
+.ff-good{background:var(--teal);}
+.ff-mid{background:var(--amber);}
+.ff-high{background:var(--red);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:22px;right:22px;padding:11px 16px;border-radius:6px;font-size:12.5px;color:#fff;box-shadow:var(--shadow-m);z-index:9999;max-width:320px;transform:translateY(70px);opacity:0;transition:all 0.28s;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.t-ok{background:var(--green);}
+.toast.t-err{background:var(--red);}
+.toast.t-info{background:var(--teal-d);}
+.toast.t-warn{background:var(--amber);}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:900;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card);border-radius:8px;box-shadow:var(--shadow-m);width:500px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+.modal-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-head h3{font-size:14px;font-weight:600;color:var(--teal-d);}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--grey);line-height:1;}
+.modal-body{padding:18px;}
+.modal-foot{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+
+/* ── ALERT ── */
+.alert{padding:9px 13px;border-radius:5px;font-size:12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;}
+.alert-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.a-info{background:#dbeafe;color:#1e40af;border-left:3px solid #3b82f6;}
+.a-warn{background:var(--amber-l);color:#92400e;border-left:3px solid var(--amber);}
+.a-ok{background:var(--green-l);color:var(--green);border-left:3px solid #22c55e;}
+.a-err{background:var(--red-l);color:var(--red);border-left:3px solid var(--red);}
+
+/* ── LOGIN PAGE ── */
+.login-wrap{max-width:440px;margin:60px auto;}
+.login-logo{text-align:center;margin-bottom:24px;}
+.login-logo .lg-circle{width:72px;height:72px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:var(--shadow-m);}
+.login-logo .lg-circle svg{width:40px;height:40px;}
+.login-logo h2{font-size:18px;font-weight:700;color:var(--teal-d);}
+.login-logo p{font-size:12px;color:var(--grey);margin-top:3px;}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow-m);padding:26px;}
+.login-hint{text-align:center;font-size:11px;color:var(--text-s);margin-top:14px;}
+
+/* ── PAGINATION ── */
+.pag{display:flex;align-items:center;gap:6px;margin-top:12px;justify-content:flex-end;}
+.pag-btn{padding:4px 9px;border:1px solid var(--border);border-radius:3px;background:#fff;color:var(--text-m);cursor:pointer;font-size:11.5px;}
+.pag-btn:hover{background:var(--teal-l);border-color:var(--teal);}
+.pag-btn.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+.pag-btn:disabled{opacity:0.35;cursor:not-allowed;}
+.pag-info{font-size:11px;color:var(--grey);}
+
+/* ── ANALYTICS ── */
+.an-section{margin-bottom:24px;}
+.an-section h3{font-size:13px;font-weight:700;color:var(--teal-d);margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid var(--teal-l);display:flex;align-items:center;gap:8px;}
+.fraud-row td{background:#fff7f7 !important;}
+.fraud-hard td{background:#fde8e8 !important;}
+.flag-hard{background:var(--red-l);color:var(--red);border:1px solid #fca5a5;font-size:10px;padding:2px 7px;border-radius:3px;font-weight:600;}
+.flag-soft{background:var(--amber-l);color:#92400e;border:1px solid var(--amber-ll);font-size:10px;padding:2px 7px;border-radius:3px;font-weight:600;}
+
+/* misc */
+.divider{border:none;border-top:1px solid var(--border-l);margin:16px 0;}
+.flex{display:flex;}.gap-8{gap:8px;}.gap-12{gap:12px;}
+.flex-end{justify-content:flex-end;}.flex-between{justify-content:space-between;}
+.align-c{align-items:center;}
+.mt8{margin-top:8px;}.mt12{margin-top:12px;}.mt16{margin-top:16px;}
+.mb8{margin-bottom:8px;}.mb12{margin-bottom:12px;}
+.text-s{font-size:11px;color:var(--text-s);}
+.text-right{text-align:right;}
+.w100{width:100%;}
+.score-high{color:var(--teal);font-weight:700;}
+.score-mid{color:var(--amber);font-weight:700;}
+.score-low{color:var(--grey);font-weight:600;}
+
+@media(max-width:768px){
+  .g2,.g3,.g4{grid-template-columns:1fr;}
+  .fr2,.fr3,.fr4{grid-template-columns:1fr;}
+  .main{padding:14px;}
+}
+</style>
+</head>
+<body>
+
+<div class="strip">
+  <span>🇮🇳 Government of India &nbsp;·&nbsp; Welfare Scheme Management System &nbsp;·&nbsp; Officer Portal</span>
+  <span id="strip-time"></span>
+</div>
+
+<div class="header">
+  <div class="h-brand">
+    <div class="emblem">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="44" stroke="#1e6b6b" stroke-width="5" fill="none"/>
+        <circle cx="50" cy="50" r="9" fill="#1e6b6b"/>
+        <circle cx="50" cy="50" r="3.5" fill="white"/>
+        <line x1="50" y1="41" x2="50" y2="8"  stroke="#1e6b6b" stroke-width="2.2"/>
+        <line x1="50" y1="59" x2="50" y2="92" stroke="#1e6b6b" stroke-width="2.2"/>
+        <line x1="41" y1="50" x2="8"  y2="50" stroke="#1e6b6b" stroke-width="2.2"/>
+        <line x1="59" y1="50" x2="92" y2="50" stroke="#1e6b6b" stroke-width="2.2"/>
+        <line x1="44" y1="44" x2="19" y2="19" stroke="#1e6b6b" stroke-width="2.2"/>
+        <line x1="56" y1="56" x2="81" y2="81" stroke="#1e6b6b" stroke-width="2.2"/>
+        <line x1="56" y1="44" x2="81" y2="19" stroke="#1e6b6b" stroke-width="2.2"/>
+        <line x1="44" y1="56" x2="19" y2="81" stroke="#1e6b6b" stroke-width="2.2"/>
+      </svg>
+    </div>
+    <div>
+      <div class="h-title">Government Scheme Management System</div>
+      <div class="h-sub">UCS310 · DBMS Project · TIET Patiala · Group 4</div>
+    </div>
+  </div>
+  <div class="h-right">
+    <div id="officer-badge">
+      <div class="ob-name" id="ob-name-text">—</div>
+      <div class="ob-role" id="ob-role-text">—</div>
+    </div>
+    <button class="logout-btn" id="logout-btn" onclick="logout()">⎋ Logout</button>
+  </div>
+</div>
+
+<div class="nav-wrap">
+  <div class="nav">
+    <div class="nav-tab active" id="tab-login" onclick="goTab('login')">🔐 Officer Login</div>
+    <div class="nav-tab locked" id="tab-dashboard" onclick="goTab('dashboard')">📋 Dashboard</div>
+    <div class="nav-tab locked" id="tab-citizens" onclick="goTab('citizens')">👥 Citizen Registry</div>
+    <div class="nav-tab locked" id="tab-apply" onclick="goTab('apply')">✉️ Apply for Scheme</div>
+    <div class="nav-tab locked" id="tab-applications" onclick="goTab('applications')">📂 Applications</div>
+    <div class="nav-tab locked" id="tab-analytics" onclick="goTab('analytics')">📊 Analytics</div>
+<div class="nav-tab locked" id="tab-backend" onclick="goTab('backend')">🗄️ Backend</div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div class="page active" id="page-login">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="lg-circle">
+        <svg viewBox="0 0 100 100" fill="none">
+          <circle cx="50" cy="50" r="44" stroke="white" stroke-width="5" fill="none"/>
+          <circle cx="50" cy="50" r="8" fill="white"/>
+          <line x1="50" y1="42" x2="50" y2="8"  stroke="white" stroke-width="2.5"/>
+          <line x1="50" y1="58" x2="50" y2="92" stroke="white" stroke-width="2.5"/>
+          <line x1="42" y1="50" x2="8"  y2="50" stroke="white" stroke-width="2.5"/>
+          <line x1="58" y1="50" x2="92" y2="50" stroke="white" stroke-width="2.5"/>
+        </svg>
+      </div>
+      <h2>Officer Secure Login</h2>
+      <p>Government Scheme Management System &nbsp;·&nbsp; Authorised Personnel Only</p>
+    </div>
+    <div class="login-card">
+      <div class="alert a-info mb12">
+        <span class="alert-icon">ℹ️</span>
+        <span>Select your officer profile from the list below. This portal is restricted to verified government officers only.</span>
+      </div>
+      <div class="fg mb12">
+        <label>Select Officer <span class="req">*</span></label>
+        <select id="login-select">
+          <option value="">-- Select your name --</option>
+        </select>
+      </div>
+      <div id="login-preview" style="display:none;background:var(--teal-l);border:1px solid var(--teal-ll);border-radius:5px;padding:10px 13px;margin-bottom:14px;font-size:12px;">
+        <div style="font-weight:600;color:var(--teal-d);" id="lp-name">—</div>
+        <div style="color:var(--text-m);margin-top:2px;" id="lp-role">—</div>
+        <div style="color:var(--text-s);margin-top:1px;" id="lp-loc">—</div>
+      </div>
+      <button class="btn btn-teal w100" onclick="doLogin()" style="padding:9px;">Login to Portal →</button>
+    </div>
+    <div class="login-hint">GSMS v2.1 · Thapar Institute of Engineering & Technology · 2025</div>
+  </div>
+</div>
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<div class="page" id="page-dashboard">
+  <div class="pg-head">
+    <h2>Officer Dashboard</h2>
+    <p id="dash-subtitle">Pending applications · Priority sorted</p>
+  </div>
+
+  <div id="dash-jur" style="display:none;"><span>🏛️</span><span id="dash-jur-text"></span></div>
+  <!-- stat row -->
+  <div class="g4 mb12" id="dash-stats"></div>
+
+  <!-- filters -->
+  <div class="filter-box">
+    <div class="filter-toggle" id="dash-filter-toggle" onclick="toggleFilter('dash')">
+      <span>🔽 &nbsp;Filter Applications</span>
+      <span class="arr">▼</span>
+    </div>
+    <div class="filter-inner" id="dash-filter-inner">
+      <div class="form-row fr4">
+        <div class="fg"><label>Income Group</label>
+          <select id="df-income">
+            <option value="">All</option>
+            <option value="bpl">Below ₹1L (BPL)</option>
+            <option value="low">₹1L – ₹2.5L</option>
+            <option value="mid">₹2.5L – ₹5L</option>
+            <option value="high">Above ₹5L</option>
+          </select>
+        </div>
+        <div class="fg"><label>Category</label>
+          <select id="df-cat">
+            <option value="">All</option>
+            <option>SC</option><option>ST</option><option>OBC</option><option>GEN</option>
+          </select>
+        </div>
+        <div class="fg"><label>State</label>
+          <select id="df-state">
+            <option value="">All States</option>
+          </select>
+        </div>
+        <div class="fg"><label>Scheme</label>
+          <select id="df-scheme">
+            <option value="">All Schemes</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-teal btn-sm" onclick="applyDashFilter()">Apply Filters</button>
+        <button class="btn btn-outline btn-sm" onclick="clearDashFilter()">Clear</button>
+      </div>
+    </div>
+    <div class="active-filters" id="dash-chips"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>📋 Pending Applications <span id="pending-count" style="font-weight:400;color:var(--grey);font-size:11px;margin-left:6px;"></span></h3>
+      <span class="text-s">Sorted by priority score ↓</span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Applicant</th><th>Aadhaar</th><th>Category</th>
+            <th>Income</th><th>Location</th><th>State</th>
+            <th>Scheme</th><th>Score</th><th>Days Pending</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="dash-tbody"></tbody>
+      </table>
+    </div>
+    <div id="dash-pag" class="pag" style="padding:10px 14px;"></div>
+  </div>
+</div>
+
+<!-- ══════════════ CITIZEN REGISTRY ══════════════ -->
+<div class="page" id="page-citizens">
+  <div class="pg-head flex flex-between align-c">
+    <div>
+      <h2>Citizen Registry</h2>
+      <p>Browse and manage registered citizens</p>
+    </div>
+    <button class="btn btn-amber" onclick="openAddCitizen()">＋ Register New Citizen</button>
+  </div>
+  <div id="cit-jur" style="display:none;"><span>🏛️</span><span id="cit-jur-text"></span></div>
+
+  <div class="filter-box">
+    <div class="filter-toggle" id="cit-filter-toggle" onclick="toggleFilter('cit')">
+      <span>🔽 &nbsp;Filter Citizens</span><span class="arr">▼</span>
+    </div>
+    <div class="filter-inner" id="cit-filter-inner">
+      <div class="form-row fr4">
+        <div class="fg"><label>Income Group</label>
+          <select id="cf-income">
+            <option value="">All</option>
+            <option value="bpl">Below ₹1L</option>
+            <option value="low">₹1L – ₹2.5L</option>
+            <option value="mid">₹2.5L – ₹5L</option>
+            <option value="high">Above ₹5L</option>
+          </select>
+        </div>
+        <div class="fg"><label>Category</label>
+          <select id="cf-cat"><option value="">All</option><option>SC</option><option>ST</option><option>OBC</option><option>GEN</option></select>
+        </div>
+        <div class="fg"><label>State</label>
+          <select id="cf-state"><option value="">All States</option></select>
+        </div>
+        <div class="fg"><label>Location</label>
+          <select id="cf-loc"><option value="">All</option><option>RURAL</option><option>URBAN</option></select>
+        </div>
+      </div>
+      <div class="fg mb12"><label>Search by name</label>
+        <input type="text" id="cf-search" placeholder="Type name..."/>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-teal btn-sm" onclick="applyCitFilter()">Apply</button>
+        <button class="btn btn-outline btn-sm" onclick="clearCitFilter()">Clear</button>
+      </div>
+    </div>
+    <div class="active-filters" id="cit-chips"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>All Citizens <span id="cit-count" style="font-weight:400;color:var(--grey);font-size:11px;margin-left:5px;"></span></h3>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Name</th><th>Aadhaar</th><th>Age</th><th>Gender</th><th>Category</th><th>Income (₹/yr)</th><th>Occupation</th><th>Location</th><th>District</th><th>State</th><th>Verified</th></tr>
+        </thead>
+        <tbody id="cit-tbody"></tbody>
+      </table>
+    </div>
+    <div id="cit-pag" class="pag" style="padding:10px 14px;"></div>
+  </div>
+</div>
+
+<!-- ══════════════ APPLY FOR SCHEME ══════════════ -->
+<div class="page" id="page-apply">
+  <div class="pg-head">
+    <h2>Submit New Application</h2>
+    <p>Select a citizen and scheme — eligibility is checked automatically before submission</p>
+  </div>
+  <div id="apply-jur-notice" style="display:none;"></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><h3>Application Form</h3></div>
+      <div class="card-body">
+        <div class="fg mb12">
+          <label>Select Citizen <span class="req">*</span></label>
+          <select id="ap-citizen" onchange="citizenSelected()"><option value="">-- Search and select citizen --</option></select>
+        </div>
+        <div id="ap-citizen-preview" style="display:none;background:var(--teal-l);border:1px solid var(--teal-ll);border-radius:5px;padding:10px 13px;margin-bottom:12px;font-size:12px;"></div>
+        <div class="fg mb12">
+          <label>Select Scheme <span class="req">*</span></label>
+          <select id="ap-scheme" onchange="checkEligibilityPreview()"><option value="">-- Select scheme --</option></select>
+        </div>
+        <div id="ap-elig-result" style="display:none;" class="mb12"></div>
+        <div class="fg mb12">
+          <label>Remarks (optional)</label>
+          <textarea id="ap-remarks" rows="2" placeholder="Additional information..."></textarea>
+        </div>
+        <div class="flex gap-8 flex-end">
+          <button class="btn btn-outline" onclick="resetApply()">Reset</button>
+          <button class="btn btn-teal" onclick="submitApplication()">Submit Application →</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card mb12">
+        <div class="card-head"><h3>💡 Scheme Eligibility Reference</h3></div>
+        <div class="card-body" id="scheme-ref-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ APPLICATIONS ══════════════ -->
+<div class="page" id="page-applications">
+  <div class="pg-head">
+    <h2>All Applications</h2>
+    <p>View, filter, and manage all applications in the system</p>
+  </div>
+  <div id="app-jur" style="display:none;"><span>🏛️</span><span id="app-jur-text"></span></div>
+
+  <div class="filter-box">
+    <div class="filter-toggle" id="app-filter-toggle" onclick="toggleFilter('app')">
+      <span>🔽 &nbsp;Filter Applications</span><span class="arr">▼</span>
+    </div>
+    <div class="filter-inner" id="app-filter-inner">
+      <div class="form-row fr4">
+        <div class="fg"><label>Status</label>
+          <select id="af-status">
+            <option value="">All</option>
+            <option>SUBMITTED</option><option>UNDER_REVIEW</option>
+            <option>APPROVED</option><option>DISBURSED</option><option>REJECTED</option>
+          </select>
+        </div>
+        <div class="fg"><label>Scheme</label>
+          <select id="af-scheme"><option value="">All Schemes</option></select>
+        </div>
+        <div class="fg"><label>Category</label>
+          <select id="af-cat"><option value="">All</option><option>SC</option><option>ST</option><option>OBC</option><option>GEN</option></select>
+        </div>
+        <div class="fg"><label>State</label>
+          <select id="af-state"><option value="">All States</option></select>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-teal btn-sm" onclick="applyAppFilter()">Apply</button>
+        <button class="btn btn-outline btn-sm" onclick="clearAppFilter()">Clear</button>
+      </div>
+    </div>
+    <div class="active-filters" id="app-chips"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Applications <span id="app-count" style="font-weight:400;color:var(--grey);font-size:11px;margin-left:5px;"></span></h3>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Citizen</th><th>Aadhaar</th><th>Category</th><th>Income</th><th>Scheme</th><th>Score</th><th>Applied</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="app-tbody"></tbody>
+      </table>
+    </div>
+    <div id="app-pag" class="pag" style="padding:10px 14px;"></div>
+  </div>
+</div>
+
+<!-- ══════════════ ANALYTICS ══════════════ -->
+<div class="page" id="page-analytics">
+  <div class="pg-head flex flex-between align-c">
+    <div><h2>Analytics & Insights</h2><p>Live metrics computed from current application data — mirrors SQL query output</p></div>
+    <button class="btn btn-outline btn-sm" onclick="renderAnalytics()">↻ Refresh</button>
+  </div>
+  <div id="an-jur" style="display:none;"><span>🏛️</span><span id="an-jur-text"></span></div>
+  <div id="analytics-body"></div>
+</div>
+<!-- ═══════════════════════════════════════════════════════
+     PART 2 — BACKEND TAB
+     Paste this entire block just before </div><!-- /main -->
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="page" id="page-backend">
+  <div class="pg-head flex flex-between align-c">
+    <div>
+      <h2>Backend — Oracle SQL / PL/SQL Reference</h2>
+      <p>Live query results computed from JS data matching SQL logic · DDL · Functions · Procedures · Triggers · 30 Queries</p>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="renderBackend()">↻ Refresh Results</button>
+  </div>
+
+  <!-- sub-nav -->
+  <div style="display:flex;gap:0;margin-bottom:20px;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+    <button class="be-tab active" id="bet-ddl"      onclick="beTab('ddl')">📐 Table DDL</button>
+    <button class="be-tab"        id="bet-plsql"    onclick="beTab('plsql')">⚙️ PL/SQL</button>
+    <button class="be-tab"        id="bet-queries"  onclick="beTab('queries')">🔍 30 Queries</button>
+  </div>
+
+  <!-- ── DDL SECTION ── -->
+  <div id="be-ddl" class="be-section">
+    <div class="alert a-info mb12">
+      <span class="alert-icon">ℹ️</span>
+      <span>All tables use <code>GENERATED ALWAYS AS IDENTITY</code> for primary keys (Oracle standard). Schema is in 3NF — no transitive dependencies.</span>
+    </div>
+    <div id="ddl-cards"></div>
+  </div>
+
+  <!-- ── PL/SQL SECTION ── -->
+  <div id="be-plsql" class="be-section" style="display:none;">
+    <div id="plsql-cards"></div>
+  </div>
+
+  <!-- ── QUERIES SECTION ── -->
+  <div id="be-queries" class="be-section" style="display:none;">
+    <div class="alert a-info mb12">
+      <span class="alert-icon">📊</span>
+      <span>All 30 queries shown with Oracle SQL syntax and live results computed from current JS dataset (~1000 citizens, ~450 applications).</span>
+    </div>
+
+    <!-- query section filters -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+      <button class="btn btn-teal btn-sm" onclick="filterQueries('all')">All (30)</button>
+      <button class="btn btn-outline btn-sm" onclick="filterQueries('basic')">§1 Basic Validation</button>
+      <button class="btn btn-outline btn-sm" onclick="filterQueries('business')">§2 Business Logic</button>
+      <button class="btn btn-outline btn-sm" onclick="filterQueries('analytics')">§3 Analytics</button>
+      <button class="btn btn-outline btn-sm" onclick="filterQueries('advanced')">§4 Advanced</button>
+    </div>
+
+    <div id="query-cards"></div>
+  </div>
+</div>
+
+<style>
+/* backend tab styles */
+.be-tab{
+  flex:1;padding:9px 14px;border:none;border-right:1px solid var(--border);
+  background:#fff;color:var(--text-m);font-size:12px;font-weight:500;
+  cursor:pointer;font-family:inherit;transition:all 0.15s;
+}
+.be-tab:last-child{border-right:none;}
+.be-tab:hover{background:var(--teal-l);}
+.be-tab.active{background:var(--teal);color:#fff;}
+
+.be-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:7px;margin-bottom:14px;box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.be-card-head{
+  padding:11px 16px;border-bottom:1px solid var(--border-l);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--teal-d);color:#fff;
+}
+.be-card-head h4{font-size:13px;font-weight:600;}
+.be-card-head .be-badge{
+  font-size:10px;padding:2px 8px;border-radius:10px;
+  background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.9);
+}
+.be-card-body{padding:14px 16px;}
+.be-desc{
+  font-size:12px;color:var(--text-m);margin-bottom:10px;
+  background:var(--olive-l);border-left:3px solid var(--olive);
+  padding:7px 10px;border-radius:0 4px 4px 0;
+}
+.sql-block{
+  background:#1e1e2e;color:#cdd6f4;
+  border-radius:5px;padding:12px 14px;
+  font-family:'Courier New',monospace;font-size:11.5px;
+  line-height:1.6;overflow-x:auto;margin-bottom:10px;
+  white-space:pre;
+}
+.sql-kw{color:#89b4fa;}   /* keywords */
+.sql-fn{color:#a6e3a1;}   /* functions */
+.sql-str{color:#f9e2af;}  /* strings/values */
+.sql-cm{color:#6c7086;}   /* comments */
+.sql-tb{color:#cba6f7;}   /* table names */
+
+.result-label{
+  font-size:10.5px;font-weight:600;text-transform:uppercase;
+  letter-spacing:0.5px;color:var(--grey);margin-bottom:6px;
+  display:flex;align-items:center;gap:6px;
+}
+.result-label::before{content:'▶';color:var(--teal);font-size:9px;}
+
+.q-section-head{
+  background:var(--teal);color:#fff;
+  padding:8px 14px;border-radius:5px;
+  font-size:12px;font-weight:600;
+  margin:16px 0 10px;display:flex;align-items:center;gap:8px;
+}
+
+.plsql-type{
+  display:inline-block;font-size:10px;padding:2px 8px;
+  border-radius:10px;margin-left:8px;font-weight:600;
+}
+.pt-fn{background:#dbeafe;color:#1d4ed8;}
+.pt-proc{background:var(--olive-l);color:var(--olive);}
+.pt-trig{background:var(--red-l);color:var(--red);}
+
+.result-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px;}
+.result-table th{background:var(--teal-d);color:#fff;padding:6px 10px;text-align:left;font-size:10.5px;font-weight:500;}
+.result-table td{padding:6px 10px;border-bottom:1px solid var(--border-l);color:var(--text-m);}
+.result-table tr:hover td{background:var(--bg2);}
+.result-table tr:last-child td{border-bottom:none;}
+.result-count{font-size:10.5px;color:var(--grey);margin-top:4px;}
+
+.ddl-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px;}
+.ddl-table th{background:var(--bg2);color:var(--teal-d);padding:7px 10px;text-align:left;font-size:11px;font-weight:600;border-bottom:2px solid var(--border);}
+.ddl-table td{padding:6px 10px;border-bottom:1px solid var(--border-l);color:var(--text-m);}
+.ddl-table .col-pk{color:var(--amber);font-weight:700;}
+.ddl-table .col-fk{color:var(--teal);font-weight:600;}
+.ddl-table .col-check{color:var(--olive);font-size:10.5px;}
+
+.hidden-q{display:none;}
+</style>
+
+<!-- ═══════════════════════════════════════════════════════
+     PART 2 — BACKEND TAB JAVASCRIPT
+     Paste this block anywhere inside your <script> tag,
+     just before the closing </script>
+     ═══════════════════════════════════════════════════════ -->
+<script id="backend-js-placeholder">
+// ── Backend tab navigation ────────────────────────────────
+function beTab(name){
+  document.querySelectorAll('.be-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.be-section').forEach(s=>s.style.display='none');
+  document.getElementById('bet-'+name).classList.add('active');
+  document.getElementById('be-'+name).style.display='block';
+}
+
+function filterQueries(section){
+  document.querySelectorAll('.q-card').forEach(c=>{
+    if(section==='all') c.classList.remove('hidden-q');
+    else c.classList.toggle('hidden-q', c.dataset.section!==section);
+  });
+}
+
+// ── SQL keyword highlighter ───────────────────────────────
+function sqlHL(sql){
+  const kws = ['SELECT','FROM','WHERE','JOIN','LEFT JOIN','INNER JOIN','GROUP BY','ORDER BY',
+    'HAVING','ON','AND','OR','NOT','IN','EXISTS','NOT EXISTS','AS','CASE','WHEN','THEN','ELSE',
+    'END','DISTINCT','COUNT','SUM','AVG','MIN','MAX','ROUND','NVL','TRUNC','TO_CHAR',
+    'NULLIF','INSERT','UPDATE','INTO','VALUES','CREATE','TABLE','PRIMARY KEY','FOREIGN KEY',
+    'REFERENCES','DEFAULT','CHECK','UNIQUE','NOT NULL','GENERATED ALWAYS AS IDENTITY',
+    'FETCH FIRST','ROWS ONLY','SYSDATE'];
+  let h = sql
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // comments
+  h = h.replace(/(--[^\n]*)/g,'<span class="sql-cm">$1</span>');
+  // strings
+  h = h.replace(/'([^']*)'/g,"<span class=\"sql-str\">'$1'</span>");
+  // keywords
+  kws.forEach(k=>{
+    const re = new RegExp('\\b('+k+')\\b','gi');
+    h = h.replace(re,'<span class="sql-kw">$1</span>');
+  });
+  // table names
+  ['Citizen','Scheme','Application','Fund_Disbursement','Officer','Department',
+   'Scheme_Fund_Pool','Scheme_Eligibility_Rules','Citizen_Documents','Application_Audit_Log'].forEach(t=>{
+    const re = new RegExp('\\b('+t+')\\b','g');
+    h = h.replace(re,'<span class="sql-tb">$1</span>');
+  });
+  return h;
+}
+
+function card(title, badge, badgeType, desc, sql, resultHtml){
+  return `
+  <div class="be-card">
+    <div class="be-card-head">
+      <h4>${title}</h4>
+      <span class="be-badge">${badge}</span>
+    </div>
+    <div class="be-card-body">
+      <div class="be-desc">${desc}</div>
+      <div class="sql-block">${sqlHL(sql)}</div>
+      <div class="result-label">Live Result</div>
+      ${resultHtml}
+    </div>
+  </div>`;
+}
+
+function tbl(headers, rows, maxRows=8){
+  if(!rows.length) return '<p style="font-size:11.5px;color:var(--grey);padding:6px 0;">No data matches current filters.</p>';
+  const shown = rows.slice(0, maxRows);
+  let h = '<div style="overflow-x:auto;"><table class="result-table"><thead><tr>';
+  headers.forEach(hd=>{ h+=`<th>${hd}</th>`; });
+  h+='</tr></thead><tbody>';
+  shown.forEach(r=>{
+    h+='<tr>';
+    r.forEach(cell=>{ h+=`<td>${cell??'—'}</td>`; });
+    h+='</tr>';
+  });
+  h+='</tbody></table></div>';
+  if(rows.length>maxRows) h+=`<div class="result-count">Showing ${maxRows} of ${rows.length} rows</div>`;
+  return h;
+}
+
+function statCards(items){
+  let h='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;">';
+  items.forEach(([label,val,color])=>{
+    h+=`<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px;text-align:center;">
+      <div style="font-size:22px;font-weight:700;color:${color||'var(--teal)'};">${val}</div>
+      <div style="font-size:10.5px;color:var(--grey);margin-top:2px;">${label}</div>
+    </div>`;
+  });
+  h+='</div>';
+  return h;
+}
+
+// ── DDL DATA ─────────────────────────────────────────────
+const DDL_TABLES = [
+  {
+    name:'Department',
+    desc:'Stores government ministries that own and manage welfare schemes.',
+    sql:`CREATE TABLE Department (
+  department_id    NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  department_name  VARCHAR2(100) NOT NULL UNIQUE,
+  department_code  VARCHAR2(10)  NOT NULL UNIQUE,
+  ministry         VARCHAR2(100) NOT NULL,
+  head_name        VARCHAR2(100),
+  established_year NUMBER(4) CHECK (established_year BETWEEN 1947 AND 2025)
+);`,
+    cols:[
+      ['department_id','NUMBER','PRIMARY KEY, IDENTITY','—'],
+      ['department_name','VARCHAR2(100)','NOT NULL, UNIQUE','—'],
+      ['department_code','VARCHAR2(10)','NOT NULL, UNIQUE','e.g. MOA, MOHFW'],
+      ['ministry','VARCHAR2(100)','NOT NULL','—'],
+      ['head_name','VARCHAR2(100)','—','—'],
+      ['established_year','NUMBER(4)','CHECK (1947–2025)','—'],
+    ]
+  },
+  {
+    name:'Scheme',
+    desc:'Core scheme catalog. Each scheme has a base and max benefit, and links to a department.',
+    sql:`CREATE TABLE Scheme (
+  scheme_id           NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  scheme_name         VARCHAR2(150) NOT NULL UNIQUE,
+  scheme_code         VARCHAR2(20)  NOT NULL UNIQUE,
+  department_id       NUMBER NOT NULL,
+  scheme_type         VARCHAR2(10)  CHECK (scheme_type IN ('MAJOR','MINOR')),
+  description         VARCHAR2(500),
+  launch_date         DATE NOT NULL,
+  base_benefit_amount NUMBER(12,2)  CHECK (base_benefit_amount > 0),
+  max_benefit_amount  NUMBER(12,2)  CHECK (max_benefit_amount > 0),
+  applicable_states   VARCHAR2(500) DEFAULT 'ALL',
+  is_active           CHAR(1) DEFAULT 'Y' CHECK (is_active IN ('Y','N')),
+  CONSTRAINT fk_scheme_dept FOREIGN KEY (department_id)
+    REFERENCES Department(department_id),
+  CONSTRAINT chk_benefit CHECK (max_benefit_amount >= base_benefit_amount)
+);`,
+    cols:[
+      ['scheme_id','NUMBER','PRIMARY KEY, IDENTITY','—'],
+      ['scheme_name','VARCHAR2(150)','NOT NULL, UNIQUE','—'],
+      ['scheme_code','VARCHAR2(20)','NOT NULL, UNIQUE','e.g. KSY-2019'],
+      ['department_id','NUMBER','FK → Department','—'],
+      ['scheme_type','VARCHAR2(10)','CHECK MAJOR/MINOR','—'],
+      ['base_benefit_amount','NUMBER(12,2)','CHECK > 0','—'],
+      ['max_benefit_amount','NUMBER(12,2)','CHECK ≥ base','—'],
+      ['is_active','CHAR(1)','DEFAULT Y, CHECK Y/N','—'],
+    ]
+  },
+  {
+    name:'Scheme_Eligibility_Rules',
+    desc:'Rule engine table — one row per scheme. Eligibility criteria stored as data, not hardcoded logic.',
+    sql:`CREATE TABLE Scheme_Eligibility_Rules (
+  rule_id            NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  scheme_id          NUMBER NOT NULL,
+  min_age            NUMBER(3) DEFAULT 18,
+  max_age            NUMBER(3) DEFAULT 120,
+  max_income         NUMBER(12,2),
+  min_income         NUMBER(12,2) DEFAULT 0,
+  allowed_categories VARCHAR2(50) DEFAULT 'ALL',
+  location_type      VARCHAR2(10) DEFAULT 'ALL'
+    CHECK (location_type IN ('RURAL','URBAN','ALL')),
+  gender_restriction VARCHAR2(5) DEFAULT 'ALL'
+    CHECK (gender_restriction IN ('M','F','ALL')),
+  min_land_acres     NUMBER(6,2) DEFAULT 0,
+  CONSTRAINT fk_rule_scheme FOREIGN KEY (scheme_id)
+    REFERENCES Scheme(scheme_id)
+);`,
+    cols:[
+      ['rule_id','NUMBER','PRIMARY KEY, IDENTITY','—'],
+      ['scheme_id','NUMBER','FK → Scheme','—'],
+      ['min_age / max_age','NUMBER(3)','DEFAULT 18 / 120','Age window'],
+      ['max_income','NUMBER(12,2)','NULL = no cap','Income ceiling'],
+      ['allowed_categories','VARCHAR2(50)','DEFAULT ALL','SC,ST,OBC,GEN or ALL'],
+      ['location_type','VARCHAR2(10)','CHECK RURAL/URBAN/ALL','—'],
+      ['gender_restriction','VARCHAR2(5)','CHECK M/F/ALL','—'],
+      ['min_land_acres','NUMBER(6,2)','DEFAULT 0','Farmer schemes'],
+    ]
+  },
+  {
+    name:'Citizen',
+    desc:'Core beneficiary registry. Aadhaar validated by regex constraint. Bank account for DBT.',
+    sql:`CREATE TABLE Citizen (
+  citizen_id         NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  aadhaar_number     CHAR(12) NOT NULL UNIQUE,
+  full_name          VARCHAR2(100) NOT NULL,
+  gender             CHAR(1) NOT NULL CHECK (gender IN ('M','F')),
+  date_of_birth      DATE NOT NULL,
+  age                NUMBER(3) CHECK (age BETWEEN 0 AND 120),
+  category           VARCHAR2(5) NOT NULL CHECK (category IN ('SC','ST','OBC','GEN')),
+  annual_income      NUMBER(12,2) NOT NULL CHECK (annual_income >= 0),
+  occupation         VARCHAR2(100),
+  land_holding_acres NUMBER(6,2) DEFAULT 0,
+  location_type      VARCHAR2(10) NOT NULL CHECK (location_type IN ('RURAL','URBAN')),
+  district           VARCHAR2(100) NOT NULL,
+  state              VARCHAR2(100) NOT NULL,
+  bank_account       VARCHAR2(20) NOT NULL UNIQUE,
+  ifsc_code          VARCHAR2(11) NOT NULL,
+  is_verified        CHAR(1) DEFAULT 'N' CHECK (is_verified IN ('Y','N')),
+  CONSTRAINT chk_aadhaar CHECK (REGEXP_LIKE(aadhaar_number, '^\d{12}$'))
+);`,
+    cols:[
+      ['citizen_id','NUMBER','PRIMARY KEY, IDENTITY','—'],
+      ['aadhaar_number','CHAR(12)','NOT NULL, UNIQUE, REGEX \\d{12}','12-digit Aadhaar'],
+      ['category','VARCHAR2(5)','CHECK SC/ST/OBC/GEN','—'],
+      ['annual_income','NUMBER(12,2)','CHECK ≥ 0','—'],
+      ['location_type','VARCHAR2(10)','CHECK RURAL/URBAN','—'],
+      ['bank_account','VARCHAR2(20)','NOT NULL, UNIQUE','For DBT'],
+      ['is_verified','CHAR(1)','DEFAULT N','Document verification flag'],
+    ]
+  },
+  {
+    name:'Application',
+    desc:'Central workflow table. UNIQUE(citizen_id, scheme_id) prevents duplicate applications.',
+    sql:`CREATE TABLE Application (
+  application_id   NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  citizen_id       NUMBER NOT NULL,
+  scheme_id        NUMBER NOT NULL,
+  officer_id       NUMBER,
+  apply_date       DATE DEFAULT SYSDATE NOT NULL,
+  status           VARCHAR2(20) DEFAULT 'SUBMITTED'
+    CHECK (status IN ('SUBMITTED','UNDER_REVIEW','APPROVED','REJECTED','DISBURSED')),
+  priority_score   NUMBER(5,2) DEFAULT 0,
+  rejection_reason VARCHAR2(300),
+  approval_date    DATE,
+  CONSTRAINT fk_app_citizen FOREIGN KEY (citizen_id) REFERENCES Citizen(citizen_id),
+  CONSTRAINT fk_app_scheme  FOREIGN KEY (scheme_id)  REFERENCES Scheme(scheme_id),
+  CONSTRAINT fk_app_officer FOREIGN KEY (officer_id) REFERENCES Officer(officer_id),
+  CONSTRAINT uq_citizen_scheme UNIQUE (citizen_id, scheme_id)
+);`,
+    cols:[
+      ['application_id','NUMBER','PRIMARY KEY, IDENTITY','—'],
+      ['citizen_id','NUMBER','FK → Citizen','—'],
+      ['scheme_id','NUMBER','FK → Scheme','—'],
+      ['officer_id','NUMBER','FK → Officer, nullable','Assigned on review'],
+      ['status','VARCHAR2(20)','CHECK valid statuses','Workflow state'],
+      ['priority_score','NUMBER(5,2)','DEFAULT 0','From get_priority_score()'],
+      ['(citizen_id,scheme_id)','—','UNIQUE constraint','Prevents duplicates'],
+    ]
+  },
+  {
+    name:'Fund_Disbursement',
+    desc:'DBT simulation record. One disbursement per approved application. Updated by trigger.',
+    sql:`CREATE TABLE Fund_Disbursement (
+  disbursement_id  NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  application_id   NUMBER NOT NULL UNIQUE,
+  amount           NUMBER(12,2) NOT NULL CHECK (amount > 0),
+  disbursement_date DATE DEFAULT SYSDATE,
+  payment_mode     VARCHAR2(10) DEFAULT 'DBT'
+    CHECK (payment_mode IN ('DBT','NEFT','RTGS')),
+  transaction_ref  VARCHAR2(50) UNIQUE,
+  bank_account     VARCHAR2(20) NOT NULL,
+  status           VARCHAR2(15) DEFAULT 'PROCESSED'
+    CHECK (status IN ('PROCESSED','FAILED')),
+  CONSTRAINT fk_disb_app FOREIGN KEY (application_id)
+    REFERENCES Application(application_id)
+);`,
+    cols:[
+      ['disbursement_id','NUMBER','PRIMARY KEY, IDENTITY','—'],
+      ['application_id','NUMBER','FK → Application, UNIQUE','One-to-one'],
+      ['amount','NUMBER(12,2)','CHECK > 0','Computed by calculate_benefit()'],
+      ['payment_mode','VARCHAR2(10)','DEFAULT DBT','DBT/NEFT/RTGS'],
+      ['transaction_ref','VARCHAR2(50)','UNIQUE','TXN reference number'],
+    ]
+  },
+  {
+    name:'Application_Audit_Log',
+    desc:'Auto-populated by trigger on every status change. Provides tamper-proof audit trail.',
+    sql:`CREATE TABLE Application_Audit_Log (
+  audit_id       NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  application_id NUMBER NOT NULL,
+  old_status     VARCHAR2(20),
+  new_status     VARCHAR2(20) NOT NULL,
+  changed_by     VARCHAR2(100) DEFAULT USER,
+  change_date    TIMESTAMP DEFAULT SYSTIMESTAMP,
+  CONSTRAINT fk_audit_app FOREIGN KEY (application_id)
+    REFERENCES Application(application_id)
+);`,
+    cols:[
+      ['audit_id','NUMBER','PRIMARY KEY, IDENTITY','—'],
+      ['application_id','NUMBER','FK → Application','—'],
+      ['old_status','VARCHAR2(20)','NULL for first insert','—'],
+      ['new_status','VARCHAR2(20)','NOT NULL','—'],
+      ['changed_by','VARCHAR2(100)','DEFAULT USER','Oracle user or system'],
+      ['change_date','TIMESTAMP','DEFAULT SYSTIMESTAMP','Precise timestamp'],
+    ]
+  },
+];
+
+// ── PL/SQL DATA ───────────────────────────────────────────
+const PLSQL_ITEMS = [
+  {
+    type:'fn', typeLabel:'Function',
+    name:'check_eligibility(citizen_id, scheme_id)',
+    desc:'Reads Scheme_Eligibility_Rules and validates citizen against age, income, category, location, gender, and land criteria. Returns ELIGIBLE or descriptive INELIGIBLE reason. Drives the rule engine — no logic is hardcoded elsewhere.',
+    sql:`CREATE OR REPLACE FUNCTION check_eligibility(
+  p_citizen_id IN NUMBER,
+  p_scheme_id  IN NUMBER
+) RETURN VARCHAR2 AS
+  v_age NUMBER; v_income NUMBER; v_category VARCHAR2(5);
+  v_location VARCHAR2(10); v_gender CHAR(1); v_land NUMBER;
+  v_min_age NUMBER; v_max_age NUMBER; v_max_inc NUMBER;
+  v_cats VARCHAR2(50); v_loc_req VARCHAR2(10); v_gen_req VARCHAR2(5);
+BEGIN
+  SELECT is_active INTO v_active FROM Scheme WHERE scheme_id = p_scheme_id;
+  IF v_active = 'N' THEN RETURN 'INELIGIBLE: Scheme inactive'; END IF;
+
+  SELECT age, annual_income, category, location_type, gender, land_holding_acres
+  INTO v_age, v_income, v_category, v_location, v_gender, v_land
+  FROM Citizen WHERE citizen_id = p_citizen_id;
+
+  SELECT min_age, max_age, max_income, allowed_categories,
+         location_type, gender_restriction, min_land_acres
+  INTO v_min_age, v_max_age, v_max_inc, v_cats, v_loc_req, v_gen_req, v_min_land
+  FROM Scheme_Eligibility_Rules WHERE scheme_id = p_scheme_id;
+
+  IF v_age < v_min_age OR v_age > v_max_age THEN
+    RETURN 'INELIGIBLE: Age out of range [' || v_min_age || '-' || v_max_age || ']';
+  END IF;
+  IF v_max_inc IS NOT NULL AND v_income > v_max_inc THEN
+    RETURN 'INELIGIBLE: Income Rs.' || v_income || ' exceeds limit Rs.' || v_max_inc;
+  END IF;
+  IF v_cats != 'ALL' AND INSTR(v_cats, v_category) = 0 THEN
+    RETURN 'INELIGIBLE: Category ' || v_category || ' not allowed';
+  END IF;
+  IF v_loc_req != 'ALL' AND v_location != v_loc_req THEN
+    RETURN 'INELIGIBLE: Scheme requires ' || v_loc_req;
+  END IF;
+  IF v_gen_req != 'ALL' AND v_gender != v_gen_req THEN
+    RETURN 'INELIGIBLE: Gender restriction';
+  END IF;
+  IF v_min_land > 0 AND v_land < v_min_land THEN
+    RETURN 'INELIGIBLE: Land below minimum ' || v_min_land || ' acres';
+  END IF;
+  RETURN 'ELIGIBLE';
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN RETURN 'INELIGIBLE: Data not found';
+END check_eligibility;`
+  },
+  {
+    type:'fn', typeLabel:'Function',
+    name:'calculate_benefit(citizen_id, scheme_id)',
+    desc:'Computes actual benefit using income-tier scaling (1.0 down to 0.40), category bonus (SC/ST +20%, OBC +10%), rural bonus (+8%), and elderly bonus for age ≥ 60 (+12%). Capped at max_benefit_amount.',
+    sql:`CREATE OR REPLACE FUNCTION calculate_benefit(
+  p_citizen_id IN NUMBER,
+  p_scheme_id  IN NUMBER
+) RETURN NUMBER AS
+  v_base NUMBER; v_max NUMBER; v_income NUMBER;
+  v_category VARCHAR2(5); v_location VARCHAR2(10);
+  v_age NUMBER; v_benefit NUMBER; v_factor NUMBER;
+BEGIN
+  SELECT base_benefit_amount, max_benefit_amount
+  INTO v_base, v_max FROM Scheme WHERE scheme_id = p_scheme_id;
+
+  SELECT annual_income, category, location_type, age
+  INTO v_income, v_category, v_location, v_age
+  FROM Citizen WHERE citizen_id = p_citizen_id;
+
+  -- income tier factor
+  IF v_income <= 50000      THEN v_factor := 1.0;
+  ELSIF v_income <= 150000  THEN v_factor := 0.88;
+  ELSIF v_income <= 300000  THEN v_factor := 0.75;
+  ELSIF v_income <= 500000  THEN v_factor := 0.60;
+  ELSE                           v_factor := 0.40; END IF;
+
+  v_benefit := v_base * v_factor;
+  IF v_category IN ('SC','ST') THEN v_benefit := v_benefit * 1.20; END IF;
+  IF v_category = 'OBC'        THEN v_benefit := v_benefit * 1.10; END IF;
+  IF v_location = 'RURAL'      THEN v_benefit := v_benefit * 1.08; END IF;
+  IF v_age >= 60               THEN v_benefit := v_benefit * 1.12; END IF;
+  IF v_benefit > v_max         THEN v_benefit := v_max; END IF;
+  RETURN ROUND(v_benefit, 2);
+EXCEPTION WHEN OTHERS THEN RETURN 0;
+END calculate_benefit;`
+  },
+  {
+    type:'fn', typeLabel:'Function',
+    name:'get_priority_score(citizen_id)',
+    desc:'Returns score 0–100 for officer queue sorting. Income: up to 50 pts (inverse). Category: ST=25, SC=22, OBC=14, GEN=5. Rural: +15. Age 60+: +10. Lower income + SC/ST + rural + elderly = highest priority.',
+    sql:`CREATE OR REPLACE FUNCTION get_priority_score(
+  p_citizen_id IN NUMBER
+) RETURN NUMBER AS
+  v_income NUMBER; v_category VARCHAR2(5);
+  v_location VARCHAR2(10); v_age NUMBER; v_score NUMBER := 0;
+BEGIN
+  SELECT annual_income, category, location_type, age
+  INTO v_income, v_category, v_location, v_age
+  FROM Citizen WHERE citizen_id = p_citizen_id;
+
+  -- Income: max 50 pts (lower = higher)
+  IF v_income <= 50000      THEN v_score := v_score + 50;
+  ELSIF v_income <= 100000  THEN v_score := v_score + 44;
+  ELSIF v_income <= 200000  THEN v_score := v_score + 36;
+  ELSIF v_income <= 350000  THEN v_score := v_score + 26;
+  ELSIF v_income <= 500000  THEN v_score := v_score + 16;
+  ELSE                           v_score := v_score + 5;  END IF;
+
+  IF v_category = 'ST'       THEN v_score := v_score + 25;
+  ELSIF v_category = 'SC'    THEN v_score := v_score + 22;
+  ELSIF v_category = 'OBC'   THEN v_score := v_score + 14;
+  ELSE                            v_score := v_score + 5;  END IF;
+
+  IF v_location = 'RURAL'    THEN v_score := v_score + 15;
+  ELSE                            v_score := v_score + 5;  END IF;
+
+  IF v_age >= 60 THEN v_score := v_score + 10; END IF;
+  RETURN v_score;
+EXCEPTION WHEN OTHERS THEN RETURN 0;
+END get_priority_score;`
+  },
+  {
+    type:'fn', typeLabel:'Function',
+    name:'is_duplicate_app(citizen_id, scheme_id)',
+    desc:"Returns 'Y' if citizen already has a non-REJECTED application for this scheme. Used as a guard in apply_scheme before any INSERT.",
+    sql:`CREATE OR REPLACE FUNCTION is_duplicate_app(
+  p_citizen_id IN NUMBER,
+  p_scheme_id  IN NUMBER
+) RETURN CHAR AS
+  v_count NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_count FROM Application
+  WHERE citizen_id = p_citizen_id
+    AND scheme_id  = p_scheme_id
+    AND status NOT IN ('REJECTED');
+  RETURN CASE WHEN v_count > 0 THEN 'Y' ELSE 'N' END;
+EXCEPTION WHEN OTHERS THEN RETURN 'N';
+END is_duplicate_app;`
+  },
+  {
+    type:'fn', typeLabel:'Function',
+    name:'get_scheme_utilization(scheme_id)',
+    desc:'Returns percentage of scheme budget disbursed. Used in fund monitoring views and the dashboard budget health bar.',
+    sql:`CREATE OR REPLACE FUNCTION get_scheme_utilization(
+  p_scheme_id IN NUMBER
+) RETURN NUMBER AS
+  v_total NUMBER; v_spent NUMBER;
+BEGIN
+  SELECT total_budget, disbursed_amount
+  INTO v_total, v_spent
+  FROM Scheme_Fund_Pool WHERE scheme_id = p_scheme_id;
+  IF v_total = 0 THEN RETURN 0; END IF;
+  RETURN ROUND((v_spent / v_total) * 100, 2);
+EXCEPTION WHEN NO_DATA_FOUND THEN RETURN 0;
+END get_scheme_utilization;`
+  },
+  {
+    type:'proc', typeLabel:'Procedure',
+    name:'generate_citizen_data',
+    desc:'Generates 1000 realistic citizen records using DBMS_RANDOM with population-weighted state distribution, right-skewed income matching census data, SC/ST/OBC/GEN proportions, and hand-curated Indian name arrays. Commits every 100 rows.',
+    sql:`CREATE OR REPLACE PROCEDURE generate_citizen_data AS
+  TYPE str_arr IS TABLE OF VARCHAR2(60);
+  v_male_names   str_arr := str_arr('Rajesh','Suresh','Arjun',...);
+  v_female_names str_arr := str_arr('Sunita','Kavita','Fatima',...);
+  v_surnames     str_arr := str_arr('Sharma','Singh','Patel',...);
+  v_states       str_arr := str_arr('Uttar Pradesh',...); -- weighted x17
+BEGIN
+  FOR i IN 1..1000 LOOP
+    -- gender: 51.5% male (Census 2011)
+    -- age: 45% young, 35% mid, 20% senior
+    -- income: 40% BPL, 30% low, 15% mid, 10% high, 5% very high
+    -- category: SC 17%, ST 8%, OBC 40%, GEN 35%
+    -- location: 65% RURAL (Census 2011)
+    INSERT INTO Citizen (...) VALUES (...);
+    IF MOD(i, 100) = 0 THEN COMMIT; END IF;
+  END LOOP;
+  COMMIT;
+  DBMS_OUTPUT.PUT_LINE('Done. 1000 citizens generated.');
+EXCEPTION
+  WHEN DUP_VAL_ON_INDEX THEN ROLLBACK;
+  WHEN OTHERS THEN ROLLBACK;
+END generate_citizen_data;`
+  },
+  {
+    type:'proc', typeLabel:'Procedure',
+    name:'generate_sample_applications',
+    desc:'Uses 3 explicit cursors: c_farmers (→ Kisan Samman, up to 200), c_bpl_rural (→ Gramin Awas, up to 150), c_health (→ Swasthya Suraksha, up to 250). Status drawn from weighted distribution mimicking real pipeline.',
+    sql:`CREATE OR REPLACE PROCEDURE generate_sample_applications AS
+  CURSOR c_farmers IS
+    SELECT citizen_id FROM Citizen
+    WHERE occupation IN ('Farmer','Agricultural Labourer')
+      AND land_holding_acres BETWEEN 0.1 AND 5
+      AND annual_income < 250000 AND ROWNUM <= 200;
+
+  CURSOR c_bpl_rural IS
+    SELECT citizen_id FROM Citizen
+    WHERE annual_income < 100000
+      AND location_type = 'RURAL' AND ROWNUM <= 150;
+
+  CURSOR c_health IS
+    SELECT citizen_id FROM Citizen
+    WHERE annual_income < 500000 AND ROWNUM <= 250;
+
+  TYPE status_list IS TABLE OF VARCHAR2(20);
+  v_statuses status_list := status_list(
+    'SUBMITTED','SUBMITTED','UNDER_REVIEW',
+    'APPROVED','APPROVED','REJECTED','DISBURSED');
+BEGIN
+  FOR r IN c_farmers LOOP
+    BEGIN
+      INSERT INTO Application (citizen_id, scheme_id, status, priority_score)
+      VALUES (r.citizen_id, 1,
+        v_statuses(ROUND(DBMS_RANDOM.VALUE(1,7))),
+        get_priority_score(r.citizen_id));
+    EXCEPTION WHEN DUP_VAL_ON_INDEX THEN NULL;
+    END;
+  END LOOP;
+  -- similar loops for c_bpl_rural (scheme 2) and c_health (scheme 3)
+  COMMIT;
+END generate_sample_applications;`
+  },
+  {
+    type:'proc', typeLabel:'Procedure',
+    name:'apply_scheme(citizen_id, scheme_id, remarks)',
+    desc:'Public application submission procedure. Checks citizen and scheme existence, calls is_duplicate_app(), calls check_eligibility(), calls get_priority_score(), then inserts with status SUBMITTED. Full exception handling with named errors.',
+    sql:`CREATE OR REPLACE PROCEDURE apply_scheme(
+  p_citizen_id IN NUMBER,
+  p_scheme_id  IN NUMBER,
+  p_remarks    IN VARCHAR2 DEFAULT NULL
+) AS
+  v_eligible VARCHAR2(200); v_score NUMBER;
+  v_cname VARCHAR2(100);    v_sname VARCHAR2(150);
+BEGIN
+  SELECT full_name INTO v_cname FROM Citizen
+    WHERE citizen_id = p_citizen_id;
+  SELECT scheme_name INTO v_sname FROM Scheme
+    WHERE scheme_id = p_scheme_id AND is_active = 'Y';
+
+  IF is_duplicate_app(p_citizen_id, p_scheme_id) = 'Y' THEN
+    RAISE_APPLICATION_ERROR(-20003, 'Active application exists for: ' || v_sname);
+  END IF;
+
+  v_eligible := check_eligibility(p_citizen_id, p_scheme_id);
+  v_score    := get_priority_score(p_citizen_id);
+
+  INSERT INTO Application (citizen_id, scheme_id, apply_date,
+    status, priority_score, remarks)
+  VALUES (p_citizen_id, p_scheme_id, SYSDATE,
+    'SUBMITTED', v_score, NVL(p_remarks,'Self-applied'));
+
+  COMMIT;
+  DBMS_OUTPUT.PUT_LINE('Submitted. Score: ' || v_score);
+  DBMS_OUTPUT.PUT_LINE('Eligibility: ' || v_eligible);
+EXCEPTION
+  WHEN OTHERS THEN ROLLBACK; RAISE;
+END apply_scheme;`
+  },
+  {
+    type:'proc', typeLabel:'Procedure',
+    name:'approve_application(app_id, officer_id, action, remarks)',
+    desc:'Officer approval workflow. Locks the row with FOR UPDATE, validates pending status, checks fund availability, calls calculate_benefit(), inserts Fund_Disbursement, updates Scheme_Fund_Pool, advances status to DISBURSED — all atomically. REJECT records reason.',
+    sql:`CREATE OR REPLACE PROCEDURE approve_application(
+  p_app_id     IN NUMBER,
+  p_officer_id IN NUMBER,
+  p_action     IN VARCHAR2,
+  p_remarks    IN VARCHAR2 DEFAULT NULL
+) AS
+  v_citizen_id NUMBER; v_scheme_id NUMBER;
+  v_curr_status VARCHAR2(20); v_benefit NUMBER;
+  v_bank VARCHAR2(20);  v_txn VARCHAR2(50); v_fund_left NUMBER;
+BEGIN
+  SELECT citizen_id, scheme_id, status
+  INTO v_citizen_id, v_scheme_id, v_curr_status
+  FROM Application WHERE application_id = p_app_id FOR UPDATE;
+
+  IF v_curr_status NOT IN ('SUBMITTED','UNDER_REVIEW') THEN
+    RAISE_APPLICATION_ERROR(-20010, 'Already processed');
+  END IF;
+
+  IF UPPER(p_action) = 'APPROVE' THEN
+    SELECT total_budget - disbursed_amount INTO v_fund_left
+    FROM Scheme_Fund_Pool WHERE scheme_id = v_scheme_id;
+    v_benefit := calculate_benefit(v_citizen_id, v_scheme_id);
+    IF v_fund_left < v_benefit THEN
+      RAISE_APPLICATION_ERROR(-20011, 'Insufficient funds');
+    END IF;
+    UPDATE Application SET status='DISBURSED', approval_date=SYSDATE,
+      officer_id=p_officer_id WHERE application_id = p_app_id;
+    INSERT INTO Fund_Disbursement (application_id, amount, bank_account, transaction_ref)
+    VALUES (p_app_id, v_benefit, v_bank, 'TXN'||TO_CHAR(SYSDATE,'YYYYMMDD')||p_app_id);
+    COMMIT;
+  ELSIF UPPER(p_action) = 'REJECT' THEN
+    UPDATE Application SET status='REJECTED',
+      rejection_reason=NVL(p_remarks,'Rejected during review')
+    WHERE application_id = p_app_id;
+    COMMIT;
+  END IF;
+EXCEPTION WHEN OTHERS THEN ROLLBACK; RAISE;
+END approve_application;`
+  },
+  {
+    type:'proc', typeLabel:'Procedure',
+    name:'generate_scheme_report',
+    desc:'Cursor-based report procedure. Opens an explicit cursor over Scheme JOIN Fund_Pool LEFT JOIN Application, fetches row-by-row, prints formatted output to DBMS_OUTPUT with running totals. Cursor is closed in EXCEPTION block.',
+    sql:`CREATE OR REPLACE PROCEDURE generate_scheme_report AS
+  CURSOR c_report IS
+    SELECT s.scheme_name, s.scheme_type,
+      sfp.disbursed_amount,
+      COUNT(a.application_id) AS total_apps,
+      SUM(CASE WHEN a.status='DISBURSED' THEN 1 ELSE 0 END) AS done,
+      SUM(CASE WHEN a.status IN ('SUBMITTED','UNDER_REVIEW')
+               THEN 1 ELSE 0 END) AS pending
+    FROM Scheme s
+    JOIN Scheme_Fund_Pool sfp ON s.scheme_id = sfp.scheme_id
+    LEFT JOIN Application a ON s.scheme_id = a.scheme_id
+    GROUP BY s.scheme_name, s.scheme_type, sfp.disbursed_amount
+    ORDER BY sfp.disbursed_amount DESC;
+  r c_report%ROWTYPE;
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('=== SCHEME PERFORMANCE REPORT ===');
+  OPEN c_report;
+  LOOP
+    FETCH c_report INTO r; EXIT WHEN c_report%NOTFOUND;
+    DBMS_OUTPUT.PUT_LINE(r.scheme_name || ' | ' ||
+      r.total_apps || ' apps | Pending: ' || r.pending);
+  END LOOP;
+  CLOSE c_report;
+EXCEPTION
+  WHEN OTHERS THEN
+    IF c_report%ISOPEN THEN CLOSE c_report; END IF;
+END generate_scheme_report;`
+  },
+  {
+    type:'trig', typeLabel:'Trigger',
+    name:'trg_application_audit',
+    desc:'AFTER UPDATE OF status ON Application. FOR EACH ROW. Inserts into Application_Audit_Log capturing old/new status, Oracle USER, and SYSTIMESTAMP. Fires automatically — no manual logging needed.',
+    sql:`CREATE OR REPLACE TRIGGER trg_application_audit
+AFTER UPDATE OF status ON Application
+FOR EACH ROW
+BEGIN
+  INSERT INTO Application_Audit_Log (
+    application_id, old_status, new_status, changed_by, change_date
+  ) VALUES (
+    :NEW.application_id, :OLD.status, :NEW.status,
+    USER, SYSTIMESTAMP
+  );
+END trg_application_audit;
+/
+-- Sample audit log after approving application 1:
+-- AUDIT_ID | APP_ID | OLD_STATUS  | NEW_STATUS  | CHANGED_BY | CHANGE_DATE
+-- 1        | 1      | SUBMITTED   | UNDER_REVIEW| EMP003     | 03-MAY-26 10:30
+-- 2        | 1      | UNDER_REVIEW| APPROVED    | EMP003     | 03-MAY-26 11:15
+-- 3        | 1      | APPROVED    | DISBURSED   | DBT_SYSTEM  | 03-MAY-26 11:16`
+  },
+  {
+    type:'trig', typeLabel:'Trigger',
+    name:'trg_fund_pool_update',
+    desc:'AFTER INSERT ON Fund_Disbursement. Looks up scheme_id from Application, then increments disbursed_amount in Scheme_Fund_Pool. Keeps fund balance accurate without any manual UPDATE.',
+    sql:`CREATE OR REPLACE TRIGGER trg_fund_pool_update
+AFTER INSERT ON Fund_Disbursement
+FOR EACH ROW
+DECLARE
+  v_scheme_id NUMBER;
+BEGIN
+  SELECT scheme_id INTO v_scheme_id
+  FROM Application WHERE application_id = :NEW.application_id;
+
+  UPDATE Scheme_Fund_Pool
+  SET disbursed_amount = disbursed_amount + :NEW.amount,
+      last_updated = SYSDATE
+  WHERE scheme_id = v_scheme_id;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('Warning: scheme not found for disbursement');
+END trg_fund_pool_update;`
+  },
+  {
+    type:'trig', typeLabel:'Trigger',
+    name:'trg_no_duplicate_app',
+    desc:'BEFORE INSERT ON Application. Counts existing non-REJECTED applications for same (citizen_id, scheme_id). Raises ORA-20030 if found. Database-level safeguard in addition to procedure-level check.',
+    sql:`CREATE OR REPLACE TRIGGER trg_no_duplicate_app
+BEFORE INSERT ON Application
+FOR EACH ROW
+DECLARE
+  v_count NUMBER; v_sname VARCHAR2(150);
+BEGIN
+  SELECT COUNT(*) INTO v_count FROM Application
+  WHERE citizen_id = :NEW.citizen_id
+    AND scheme_id  = :NEW.scheme_id
+    AND status NOT IN ('REJECTED');
+
+  IF v_count > 0 THEN
+    SELECT scheme_name INTO v_sname
+    FROM Scheme WHERE scheme_id = :NEW.scheme_id;
+    RAISE_APPLICATION_ERROR(-20030,
+      'Active application exists for: ' || v_sname);
+  END IF;
+END trg_no_duplicate_app;
+/
+-- Test output:
+-- ORA-20030: Active application exists for: Kisan Samman Yojana
+-- ORA-06512: at "GSMS.TRG_NO_DUPLICATE_APP", line 10`
+  },
+];
+
+// ── 30 QUERIES DEFINITIONS ────────────────────────────────
+function buildQueries(){
+  // live data helpers
+  const apps  = APPLICATIONS;
+  const cits  = CITIZENS;
+
+  // Q1
+  const q1rows = SCHEMES.map(s=>[s.name, s.type, s.dept,
+    '₹'+s.base.toLocaleString('en-IN'), s.max>=1000?'Y':'Y']);
+
+  // Q2: citizens from UP ordered by income
+  const q2rows = cits.filter(c=>c.state==='Uttar Pradesh')
+    .sort((a,b)=>a.income-b.income).slice(0,8)
+    .map(c=>[c.name,c.state,c.district,c.category,'₹'+c.income.toLocaleString('en-IN'),c.location]);
+
+  // Q3: applications with citizen and scheme
+  const q3rows = [...apps].sort((a,b)=>b.applyDate-a.applyDate).slice(0,8)
+    .map(a=>['APP-'+String(a.id).padStart(4,'0'), a.citizen.name,
+      a.citizen.aadhaar, a.scheme.name, a.status, a.applyDateStr, a.priority]);
+
+  // Q4: officers with dept
+  const q4rows = OFFICERS.filter(o=>!o.isSupervisor).slice(0,8)
+    .map(o=>[o.name,o.designation,o.dept,o.district,o.state]);
+
+  // Q5: active schemes with budget
+  const q5rows = SCHEMES.map(s=>{
+    const spent = fundDisbursed[s.id]||0;
+    return [s.name,s.type,'₹'+Math.round(s.budget/10000000)+'Cr',
+      '₹'+(spent/100000).toFixed(1)+'L','₹'+Math.round((s.budget-spent)/10000000)+'Cr'];
+  });
+
+  // Q6: pending docs (simulate with unverified citizens)
+  const q6rows = cits.filter(c=>c.verified==='N').slice(0,8)
+    .map(c=>['DOC-'+c.id, c.name, c.aadhaar, 'AADHAAR', c.regDate, 'PENDING']);
+
+  // Q7: eligibility rules
+  const q7rows = SCHEMES.map(s=>[s.name,'18','75',
+    s.maxIncome?'₹'+s.maxIncome.toLocaleString('en-IN'):'None',
+    s.category, s.location, s.gender==='ALL'?'ALL':s.gender,
+    s.minLand>0?s.minLand+'ac':'—']);
+
+  // Q8: app count per scheme per status
+  const q8map={};
+  apps.forEach(a=>{
+    const k=a.scheme.name+'|'+a.status;
+    q8map[k]=(q8map[k]||0)+1;
+  });
+  const q8rows=Object.entries(q8map).sort().slice(0,10)
+    .map(([k,v])=>[...k.split('|'),v]);
+
+  // Q9: eligible for SSY (scheme 3) who haven't applied
+  const applied3 = new Set(apps.filter(a=>a.schemeId===3).map(a=>a.citizenId));
+  const q9rows = cits.filter(c=>c.income<500000&&c.verified==='Y'&&!applied3.has(c.id))
+    .sort((a,b)=>a.income-b.income).slice(0,8)
+    .map(c=>[c.id,c.name,c.state,c.category,'₹'+c.income.toLocaleString('en-IN')]);
+
+  // Q10: pending by priority
+  const q10rows = apps.filter(a=>a.status==='SUBMITTED'||a.status==='UNDER_REVIEW')
+    .sort((a,b)=>b.priority-a.priority).slice(0,8)
+    .map(a=>['APP-'+String(a.id).padStart(4,'0'),a.citizen.name,
+      a.citizen.category,'₹'+a.citizen.income.toLocaleString('en-IN'),
+      a.scheme.name,a.priority,a.applyDateStr,a.daysAgo+'d']);
+
+  // Q11: schemes with more than 10 apps (lowered from 50 for demo data)
+  const q11map={};
+  apps.forEach(a=>{ q11map[a.scheme.name]=(q11map[a.scheme.name]||0)+1; });
+  const q11rows=Object.entries(q11map).filter(([,v])=>v>10)
+    .sort((a,b)=>b[1]-a[1]).map(([n,v])=>[n,v]);
+
+  // Q12: multi-scheme applicants
+  const q12map={};
+  apps.forEach(a=>{
+    if(!q12map[a.citizenId]) q12map[a.citizenId]={c:a.citizen,count:0};
+    q12map[a.citizenId].count++;
+  });
+  const q12rows=Object.values(q12map).filter(d=>d.count>1)
+    .sort((a,b)=>b.count-a.count).slice(0,8)
+    .map(d=>[d.c.id,d.c.name,d.c.category,'₹'+d.c.income.toLocaleString('en-IN'),d.count]);
+
+  // Q13: recent disbursements (last 30 days simulated)
+  const q13rows=apps.filter(a=>a.status==='DISBURSED'&&a.daysAgo<=30)
+    .sort((a,b)=>a.daysAgo-b.daysAgo).slice(0,8)
+    .map(a=>['DISB-'+a.id,a.citizen.name,a.scheme.name,
+      '₹'+a.benefit.toLocaleString('en-IN'),a.approvalDateStr,'DBT',a.txnRef||'—']);
+
+  // Q14: rejected with reasons
+  const q14rows=apps.filter(a=>a.status==='REJECTED').slice(0,8)
+    .map(a=>['APP-'+String(a.id).padStart(4,'0'),a.citizen.name,
+      a.citizen.aadhaar,a.scheme.name,a.rejectionReason||'—',a.approvalDateStr]);
+
+  // Q15: funds per scheme
+  const q15rows=SCHEMES.map(s=>{
+    const schApps=apps.filter(a=>a.schemeId===s.id&&a.status==='DISBURSED');
+    const total=schApps.reduce((x,a)=>x+a.benefit,0);
+    const avg=schApps.length?Math.round(total/schApps.length):0;
+    return [s.name,'₹'+(total/100000).toFixed(1)+'L',schApps.length,'₹'+avg.toLocaleString('en-IN')];
+  }).sort((a,b)=>parseFloat(b[1])-parseFloat(a[1]));
+
+  // Q16: budget utilization with health status
+  const q16rows=SCHEMES.map(s=>{
+    const spent=fundDisbursed[s.id]||0;
+    const pct=Math.round(spent/s.budget*100*100)/100;
+    const status=pct>=90?'CRITICAL':pct>=50?'MODERATE':'HEALTHY';
+    return [s.name,'₹'+Math.round(s.budget/10000000)+'Cr',
+      '₹'+(spent/100000).toFixed(1)+'L',pct+'%',status];
+  }).sort((a,b)=>parseFloat(b[3])-parseFloat(a[3]));
+
+  // Q17: rural vs urban per scheme
+  const q17map={};
+  apps.filter(a=>a.status==='APPROVED'||a.status==='DISBURSED').forEach(a=>{
+    const k=a.scheme.name+'|'+a.citizen.location;
+    if(!q17map[k]) q17map[k]={benes:new Set(),amt:0};
+    q17map[k].benes.add(a.citizenId);
+    q17map[k].amt+=a.benefit;
+  });
+  const q17rows=Object.entries(q17map).slice(0,10)
+    .map(([k,v])=>[...k.split('|'),v.benes.size,'₹'+(v.amt/100000).toFixed(1)+'L']);
+
+  // Q18: state-wise disbursement
+  const q18map={};
+  apps.filter(a=>a.status==='DISBURSED'||a.status==='APPROVED').forEach(a=>{
+    const st=a.citizen.state;
+    if(!q18map[st]) q18map[st]={count:0,total:0};
+    q18map[st].count++; q18map[st].total+=a.benefit;
+  });
+  const q18rows=Object.entries(q18map)
+    .sort((a,b)=>b[1].total-a[1].total).slice(0,8)
+    .map(([st,d])=>[st,d.count,'₹'+(d.total/100000).toFixed(1)+'L',
+      '₹'+Math.round(d.total/Math.max(d.count,1)).toLocaleString('en-IN')]);
+
+  // Q19: category breakdown
+  const q19rows=['SC','ST','OBC','GEN'].map(cat=>{
+    const catCits=cits.filter(c=>c.category===cat).length;
+    const catApps=apps.filter(a=>a.citizen.category===cat);
+    const appr=catApps.filter(a=>a.status==='APPROVED'||a.status==='DISBURSED');
+    const total=appr.reduce((s,a)=>s+a.benefit,0);
+    return [cat,catCits,catApps.length,appr.length,'₹'+(total/100000).toFixed(1)+'L'];
+  });
+
+  // Q20: avg priority of approved applicants per scheme
+  const q20rows=SCHEMES.map(s=>{
+    const appr=apps.filter(a=>a.schemeId===s.id&&(a.status==='APPROVED'||a.status==='DISBURSED'));
+    if(!appr.length) return [s.name,'—','—','—'];
+    const avg=Math.round(appr.reduce((x,a)=>x+a.priority,0)/appr.length);
+    const mn=Math.min(...appr.map(a=>a.priority));
+    const mx=Math.max(...appr.map(a=>a.priority));
+    return [s.name,avg,mn,mx];
+  }).sort((a,b)=>(parseInt(b[1])||0)-(parseInt(a[1])||0));
+
+  // Q21: monthly trend
+  const q21map={};
+  apps.forEach(a=>{
+    const m=a.applyDate.toISOString?a.applyDate.toISOString().slice(0,7):
+      new Date(a.applyDate).toISOString().slice(0,7);
+    if(!q21map[m]) q21map[m]={total:0,disbursed:0};
+    q21map[m].total++;
+    if(a.status==='DISBURSED') q21map[m].disbursed++;
+  });
+  const q21rows=Object.entries(q21map).sort().slice(-8)
+    .map(([m,d])=>[m,d.total,d.disbursed]);
+
+  // Q22: below state avg income, not applied
+  const stateAvg={};
+  cits.forEach(c=>{
+    if(!stateAvg[c.state]) stateAvg[c.state]={sum:0,cnt:0};
+    stateAvg[c.state].sum+=c.income; stateAvg[c.state].cnt++;
+  });
+  Object.keys(stateAvg).forEach(s=>{
+    stateAvg[s]=stateAvg[s].sum/stateAvg[s].cnt;
+  });
+  const appliedAny=new Set(apps.map(a=>a.citizenId));
+  const q22rows=cits.filter(c=>
+    c.income<stateAvg[c.state]&&!appliedAny.has(c.id)&&c.verified==='Y'
+  ).sort((a,b)=>a.income-b.income).slice(0,8)
+  .map(c=>[c.id,c.name,c.state,'₹'+c.income.toLocaleString('en-IN'),c.category]);
+
+  // Q23: fraud — high income on BPL schemes (1,2,5)
+  const BPL_IDS=[1,2,5];
+  const q23rows=apps.filter(a=>a.citizen.income>500000&&BPL_IDS.includes(a.schemeId))
+    .sort((a,b)=>b.citizen.income-a.citizen.income).slice(0,8)
+    .map(a=>[a.citizen.name,a.citizen.aadhaar,
+      '₹'+a.citizen.income.toLocaleString('en-IN'),
+      a.citizen.category,a.scheme.name,a.status,a.applyDateStr]);
+
+  // Q24: officer performance
+  const offMap={};
+  apps.forEach(a=>{
+    const oid=a.officerId;
+    if(!offMap[oid]) offMap[oid]={o:a.officer,total:0,appr:0,rej:0,days:[]};
+    offMap[oid].total++;
+    if(a.status==='APPROVED'||a.status==='DISBURSED') offMap[oid].appr++;
+    if(a.status==='REJECTED') offMap[oid].rej++;
+    if(a.approvalDate) offMap[oid].days.push(a.daysAgo - (a.daysAgo - rndInt(3,25)));
+  });
+  const q24rows=Object.values(offMap).filter(d=>d.total>0)
+    .sort((a,b)=>b.appr/Math.max(b.total,1)-a.appr/Math.max(a.total,1)).slice(0,8)
+    .map(d=>[d.o.name,d.o.state,d.total,d.appr,d.rej,
+      Math.round(d.appr*100/Math.max(d.total,1))+'%',
+      d.days.length?Math.round(d.days.reduce((a,b)=>a+b,0)/d.days.length)+'d':'—']);
+
+  // Q25: top 5 schemes by disbursement
+  const q25rows=SCHEMES.map(s=>{
+    const total=apps.filter(a=>a.schemeId===s.id&&a.status==='DISBURSED')
+      .reduce((x,a)=>x+a.benefit,0);
+    return [s.name,'₹'+(total/100000).toFixed(1)+'L'];
+  }).sort((a,b)=>parseFloat(b[1])-parseFloat(a[1])).slice(0,5);
+
+  // Q26: unverified citizens with pending apps
+  const q26rows=apps.filter(a=>
+    a.citizen.verified==='N'&&(a.status==='SUBMITTED'||a.status==='UNDER_REVIEW')
+  ).slice(0,8).map(a=>[a.citizen.id,a.citizen.name,a.citizen.aadhaar,
+    'N','APP-'+String(a.id).padStart(4,'0'),a.scheme.name,a.status]);
+
+  // Q27: no assigned officer (simulated via hasOfficer flag)
+  const q27rows=apps.filter(a=>!a.hasOfficer&&(a.status==='SUBMITTED'||a.status==='UNDER_REVIEW'))
+    .sort((a,b)=>b.daysAgo-a.daysAgo).slice(0,8)
+    .map(a=>['APP-'+String(a.id).padStart(4,'0'),a.citizen.name,
+      a.scheme.name,a.status,a.applyDateStr,a.daysAgo+'d']);
+
+  // Q28: audit trail for first application
+  const q28app=APPLICATIONS[0];
+  const q28rows=q28app?(q28app.auditLog||[]).map((l,i)=>[
+    i+1, 'APP-'+String(q28app.id).padStart(4,'0'),
+    l.oldStatus||'—', l.newStatus, l.changedBy,
+    l.date.toLocaleString('en-IN')
+  ]):[];
+
+  // Q29: dept-wise budget
+  const depts=['Agriculture','Housing','Health','Rural Dev','WCD','Social Jus.','Energy'];
+  const q29rows=depts.map(dept=>{
+    const dSchemes=SCHEMES.filter(s=>s.dept===dept);
+    const totalBudget=dSchemes.reduce((x,s)=>x+s.budget,0);
+    const totalSpent=dSchemes.reduce((x,s)=>x+(fundDisbursed[s.id]||0),0);
+    const pct=totalBudget?Math.round(totalSpent/totalBudget*10000)/100:0;
+    return [dept,dSchemes.length,'₹'+Math.round(totalBudget/10000000)+'Cr',
+      '₹'+(totalSpent/100000).toFixed(1)+'L',pct+'%'];
+  }).sort((a,b)=>parseFloat(b[3])-parseFloat(a[3]));
+
+  // Q30: full pipeline view
+  const q30rows=[...apps].sort((a,b)=>b.priority-a.priority).slice(0,8)
+    .map(a=>[a.citizen.name,a.citizen.state,a.citizen.category,
+      a.scheme.name,a.status,a.priority,a.applyDateStr,
+      a.status==='DISBURSED'?'₹'+a.benefit.toLocaleString('en-IN'):'—',
+      a.txnRef||'—']);
+
+  return [
+    // §1 BASIC VALIDATION
+    {num:'Q1',section:'basic',title:'List All Schemes With Their Department',
+     badge:'Basic · JOIN',
+     desc:'Displays all welfare schemes with parent department and benefit ranges, grouped by type.',
+     sql:`SELECT s.scheme_name, s.scheme_type, d.department_name,
+       s.base_benefit_amount, s.is_active
+FROM Scheme s
+JOIN Department d ON s.department_id = d.department_id
+ORDER BY s.scheme_type, s.scheme_name;`,
+     result:tbl(['Scheme Name','Type','Department','Base Benefit','Active'],q1rows)},
+
+    {num:'Q2',section:'basic',title:'All Citizens From Uttar Pradesh',
+     badge:'Basic · WHERE',
+     desc:'Retrieves all citizens from UP sorted by income to identify most economically vulnerable.',
+     sql:`SELECT full_name, state, district, category,
+       annual_income, location_type
+FROM Citizen
+WHERE state = 'Uttar Pradesh'
+ORDER BY annual_income ASC;`,
+     result:tbl(['Name','State','District','Category','Income','Location'],q2rows)+
+       `<div class="result-count">Total UP citizens: ${cits.filter(c=>c.state==='Uttar Pradesh').length}</div>`},
+
+    {num:'Q3',section:'basic',title:'Applications With Citizen and Scheme Details',
+     badge:'Basic · 3-table JOIN',
+     desc:'Joins Application, Citizen, and Scheme to produce full application register.',
+     sql:`SELECT a.application_id, c.full_name, c.aadhaar_number,
+       s.scheme_name, a.status, a.apply_date, a.priority_score
+FROM Application a
+JOIN Citizen c ON a.citizen_id = c.citizen_id
+JOIN Scheme s  ON a.scheme_id  = s.scheme_id
+ORDER BY a.apply_date DESC;`,
+     result:tbl(['App ID','Citizen','Aadhaar','Scheme','Status','Applied','Priority'],q3rows)},
+
+    {num:'Q4',section:'basic',title:'All Officers With Department and Assignment',
+     badge:'Basic · JOIN',
+     desc:'Full officer roster sorted by state — useful for verifying coverage across districts.',
+     sql:`SELECT o.officer_name, o.designation, d.department_name,
+       o.assigned_district, o.assigned_state
+FROM Officer o
+JOIN Department d ON o.department_id = d.department_id
+ORDER BY o.assigned_state;`,
+     result:tbl(['Officer Name','Designation','Department','District','State'],q4rows)},
+
+    {num:'Q5',section:'basic',title:'Active Schemes With Budget Summary',
+     badge:'Basic · JOIN · WHERE',
+     desc:'Only active schemes with budget allocation and remaining balance from fund pool.',
+     sql:`SELECT s.scheme_name, s.scheme_type,
+       sfp.total_budget, sfp.disbursed_amount,
+       sfp.total_budget - sfp.disbursed_amount AS remaining_budget
+FROM Scheme s
+JOIN Scheme_Fund_Pool sfp ON s.scheme_id = sfp.scheme_id
+WHERE s.is_active = 'Y'
+ORDER BY sfp.total_budget DESC;`,
+     result:tbl(['Scheme','Type','Total Budget','Disbursed','Remaining'],q5rows)},
+
+    {num:'Q6',section:'basic',title:'Documents Pending Verification',
+     badge:'Basic · JOIN · WHERE',
+     desc:'All citizen documents awaiting officer verification, sorted oldest first.',
+     sql:`SELECT cd.doc_id, c.full_name, c.aadhaar_number,
+       cd.doc_type, cd.upload_date, cd.status
+FROM Citizen_Documents cd
+JOIN Citizen c ON cd.citizen_id = c.citizen_id
+WHERE cd.status = 'PENDING'
+ORDER BY cd.upload_date ASC;`,
+     result:tbl(['Doc ID','Citizen','Aadhaar','Doc Type','Upload Date','Status'],q6rows)+
+       `<div class="result-count">Total unverified citizens (simulated): ${cits.filter(c=>c.verified==='N').length}</div>`},
+
+    {num:'Q7',section:'basic',title:'Eligibility Rules for All Schemes',
+     badge:'Basic · JOIN',
+     desc:'Complete eligibility criteria from the rule engine table — no hardcoded logic.',
+     sql:`SELECT s.scheme_name, r.min_age, r.max_age,
+       r.max_income, r.allowed_categories,
+       r.location_type, r.gender_restriction, r.min_land_acres
+FROM Scheme_Eligibility_Rules r
+JOIN Scheme s ON r.scheme_id = s.scheme_id
+ORDER BY s.scheme_name;`,
+     result:tbl(['Scheme','Min Age','Max Age','Max Income','Categories','Location','Gender','Min Land'],q7rows)},
+
+    // §2 BUSINESS LOGIC
+    {num:'Q8',section:'business',title:'Application Count Per Scheme By Status',
+     badge:'Business · GROUP BY',
+     desc:'Status breakdown per scheme — identifies pipeline bottlenecks.',
+     sql:`SELECT s.scheme_name, a.status,
+       COUNT(*) AS count
+FROM Application a
+JOIN Scheme s ON a.scheme_id = s.scheme_id
+GROUP BY s.scheme_name, a.status
+ORDER BY s.scheme_name, a.status;`,
+     result:tbl(['Scheme Name','Status','Count'],q8rows)},
+
+    {num:'Q9',section:'business',title:'Citizens Eligible for Swasthya Suraksha — Not Applied',
+     badge:'Business · NOT EXISTS',
+     desc:'Verified citizens qualifying for health scheme who have not applied — outreach targets.',
+     sql:`SELECT c.citizen_id, c.full_name, c.state,
+       c.category, c.annual_income
+FROM Citizen c
+WHERE c.annual_income < 500000
+  AND c.is_verified = 'Y'
+  AND NOT EXISTS (
+    SELECT 1 FROM Application a
+    WHERE a.citizen_id = c.citizen_id AND a.scheme_id = 3
+  )
+ORDER BY c.annual_income ASC;`,
+     result:tbl(['ID','Name','State','Category','Income'],q9rows)+
+       `<div class="result-count">Total potential outreach targets: ${cits.filter(c=>c.income<500000&&c.verified==='Y'&&!new Set(apps.filter(a=>a.schemeId===3).map(a=>a.citizenId)).has(c.id)).length}</div>`},
+
+    {num:'Q10',section:'business',title:'Officer Priority Queue — Pending By Score',
+     badge:'Business · ORDER BY priority',
+     desc:"Officer's daily work queue — most vulnerable applicants processed first.",
+     sql:`SELECT a.application_id, c.full_name, c.category,
+       c.annual_income, s.scheme_name,
+       a.priority_score, a.apply_date,
+       TRUNC(SYSDATE - a.apply_date) AS days_waiting
+FROM Application a
+JOIN Citizen c ON a.citizen_id = c.citizen_id
+JOIN Scheme s  ON a.scheme_id  = s.scheme_id
+WHERE a.status IN ('SUBMITTED','UNDER_REVIEW')
+ORDER BY a.priority_score DESC, a.apply_date ASC;`,
+     result:tbl(['App ID','Name','Cat','Income','Scheme','Score','Applied','Waiting'],q10rows)},
+
+    {num:'Q11',section:'business',title:'Popular Schemes — More Than 10 Applications',
+     badge:'Business · GROUP BY · HAVING',
+     desc:'Schemes with significant volume — may need additional officer allocation.',
+     sql:`SELECT s.scheme_name,
+       COUNT(a.application_id) AS total_applications
+FROM Scheme s
+LEFT JOIN Application a ON s.scheme_id = a.scheme_id
+GROUP BY s.scheme_name
+HAVING COUNT(a.application_id) > 10
+ORDER BY total_applications DESC;`,
+     result:tbl(['Scheme Name','Total Applications'],q11rows)},
+
+    {num:'Q12',section:'business',title:'Citizens With Multiple Scheme Applications',
+     badge:'Business · GROUP BY · HAVING',
+     desc:'Multi-scheme beneficiaries for policy analysis.',
+     sql:`SELECT c.citizen_id, c.full_name, c.category,
+       c.annual_income, COUNT(a.application_id) AS total_applications
+FROM Citizen c
+JOIN Application a ON c.citizen_id = a.citizen_id
+GROUP BY c.citizen_id, c.full_name, c.category, c.annual_income
+HAVING COUNT(a.application_id) > 1
+ORDER BY total_applications DESC;`,
+     result:tbl(['ID','Name','Category','Income','Applications'],q12rows)},
+
+    {num:'Q13',section:'business',title:'Disbursements in Last 30 Days',
+     badge:'Business · Date filter',
+     desc:'Successful DBT disbursements in past 30 days — for month-end reconciliation.',
+     sql:`SELECT fd.disbursement_id, c.full_name, s.scheme_name,
+       fd.amount, fd.disbursement_date,
+       fd.payment_mode, fd.transaction_ref
+FROM Fund_Disbursement fd
+JOIN Application a ON fd.application_id = a.application_id
+JOIN Citizen c ON a.citizen_id = c.citizen_id
+JOIN Scheme s  ON a.scheme_id  = s.scheme_id
+WHERE fd.disbursement_date >= SYSDATE - 30
+  AND fd.status = 'PROCESSED'
+ORDER BY fd.disbursement_date DESC;`,
+     result:tbl(['Disb ID','Citizen','Scheme','Amount','Date','Mode','Txn Ref'],q13rows)},
+
+    {num:'Q14',section:'business',title:'Rejected Applications With Reasons',
+     badge:'Business · WHERE · JOIN',
+     desc:'All rejections with officer-recorded reasons — for grievance and appeals analysis.',
+     sql:`SELECT a.application_id, c.full_name, c.aadhaar_number,
+       s.scheme_name, a.rejection_reason, a.approval_date
+FROM Application a
+JOIN Citizen c ON a.citizen_id = c.citizen_id
+JOIN Scheme s  ON a.scheme_id  = s.scheme_id
+WHERE a.status = 'REJECTED'
+ORDER BY a.approval_date DESC;`,
+     result:tbl(['App ID','Name','Aadhaar','Scheme','Reason','Date'],q14rows)},
+
+    // §3 ANALYTICS
+    {num:'Q15',section:'analytics',title:'Total Funds Disbursed Per Scheme',
+     badge:'Analytics · SUM · AVG',
+     desc:'Financial summary per scheme — total, count, and average benefit.',
+     sql:`SELECT s.scheme_name,
+       NVL(SUM(fd.amount), 0) AS total_disbursed,
+       COUNT(fd.disbursement_id) AS disbursement_count,
+       ROUND(NVL(AVG(fd.amount), 0), 2) AS avg_per_beneficiary
+FROM Scheme s
+LEFT JOIN Application a ON s.scheme_id = a.scheme_id
+LEFT JOIN Fund_Disbursement fd ON a.application_id = fd.application_id
+GROUP BY s.scheme_name
+ORDER BY total_disbursed DESC;`,
+     result:tbl(['Scheme','Total Disbursed','Count','Avg Per Beneficiary'],q15rows)},
+
+    {num:'Q16',section:'analytics',title:'Scheme Budget Utilisation With Health Status',
+     badge:'Analytics · CASE · %',
+     desc:'Budget utilisation per scheme classified as HEALTHY, MODERATE, or CRITICAL.',
+     sql:`SELECT s.scheme_name,
+       sfp.total_budget, sfp.disbursed_amount,
+       sfp.total_budget - sfp.disbursed_amount AS remaining,
+       ROUND((sfp.disbursed_amount / sfp.total_budget) * 100, 2) AS used_pct,
+       CASE
+         WHEN sfp.disbursed_amount / sfp.total_budget >= 0.9 THEN 'CRITICAL'
+         WHEN sfp.disbursed_amount / sfp.total_budget >= 0.5 THEN 'MODERATE'
+         ELSE 'HEALTHY'
+       END AS budget_status
+FROM Scheme s
+JOIN Scheme_Fund_Pool sfp ON s.scheme_id = sfp.scheme_id
+ORDER BY used_pct DESC;`,
+     result:tbl(['Scheme','Total Budget','Disbursed','Remaining','Used %','Status'],q16rows)},
+
+    {num:'Q17',section:'analytics',title:'Rural vs Urban Beneficiary Breakdown Per Scheme',
+     badge:'Analytics · GROUP BY 2 cols',
+     desc:'Geographic equity analysis — approved beneficiaries split by location type.',
+     sql:`SELECT s.scheme_name, c.location_type,
+       COUNT(DISTINCT a.citizen_id) AS beneficiaries,
+       NVL(SUM(fd.amount), 0) AS total_amount
+FROM Scheme s
+JOIN Application a ON s.scheme_id = a.scheme_id
+JOIN Citizen c ON a.citizen_id = c.citizen_id
+LEFT JOIN Fund_Disbursement fd ON a.application_id = fd.application_id
+WHERE a.status IN ('APPROVED','DISBURSED')
+GROUP BY s.scheme_name, c.location_type
+ORDER BY s.scheme_name, c.location_type;`,
+     result:tbl(['Scheme','Location','Beneficiaries','Total Amount'],q17rows)},
+
+    {num:'Q18',section:'analytics',title:'State-wise Disbursed Applications and Funds',
+     badge:'Analytics · GROUP BY · AVG',
+     desc:'State-wise fund distribution — which states receive most welfare support.',
+     sql:`SELECT c.state,
+       COUNT(DISTINCT a.application_id) AS disbursed_apps,
+       NVL(SUM(fd.amount), 0) AS total_funds,
+       ROUND(AVG(fd.amount), 0) AS avg_benefit
+FROM Citizen c
+JOIN Application a ON c.citizen_id = a.citizen_id
+LEFT JOIN Fund_Disbursement fd ON a.application_id = fd.application_id
+WHERE a.status IN ('APPROVED','DISBURSED')
+GROUP BY c.state
+ORDER BY total_funds DESC;`,
+     result:tbl(['State','Disbursed Apps','Total Funds','Avg Benefit'],q18rows)},
+
+    {num:'Q19',section:'analytics',title:'Category-wise Benefits Received',
+     badge:'Analytics · CASE SUM',
+     desc:'SC/ST/OBC/GEN distribution of benefits — verifies social equity objectives.',
+     sql:`SELECT c.category,
+       COUNT(DISTINCT c.citizen_id) AS total_citizens,
+       COUNT(a.application_id) AS applications,
+       SUM(CASE WHEN a.status IN ('APPROVED','DISBURSED') THEN 1 ELSE 0 END) AS approved,
+       NVL(SUM(fd.amount), 0) AS total_benefit
+FROM Citizen c
+LEFT JOIN Application a ON c.citizen_id = a.citizen_id
+LEFT JOIN Fund_Disbursement fd ON a.application_id = fd.application_id
+GROUP BY c.category
+ORDER BY total_benefit DESC;`,
+     result:tbl(['Category','Citizens','Applications','Approved','Total Benefit'],q19rows)},
+
+    {num:'Q20',section:'analytics',title:'Scheme-wise Average Priority of Approved Applicants',
+     badge:'Analytics · AVG · MIN · MAX',
+     desc:'Fairness check — are more vulnerable citizens actually getting approved?',
+     sql:`SELECT s.scheme_name,
+       ROUND(AVG(a.priority_score), 2) AS avg_priority_score,
+       MIN(a.priority_score) AS min_score,
+       MAX(a.priority_score) AS max_score
+FROM Application a
+JOIN Scheme s ON a.scheme_id = s.scheme_id
+WHERE a.status IN ('APPROVED','DISBURSED')
+GROUP BY s.scheme_name
+ORDER BY avg_priority_score DESC;`,
+     result:tbl(['Scheme','Avg Priority','Min Score','Max Score'],q20rows)},
+
+    {num:'Q21',section:'analytics',title:'Monthly Application Submission Trend',
+     badge:'Analytics · TO_CHAR · GROUP BY',
+     desc:'Monthly volumes and disbursements — identifies seasonal trends or surges.',
+     sql:`SELECT TO_CHAR(apply_date, 'YYYY-MM') AS month,
+       COUNT(*) AS total_applications,
+       SUM(CASE WHEN status = 'DISBURSED' THEN 1 ELSE 0 END) AS disbursed
+FROM Application
+GROUP BY TO_CHAR(apply_date, 'YYYY-MM')
+ORDER BY month;`,
+     result:tbl(['Month','Total Applications','Disbursed'],q21rows)},
+
+    // §4 ADVANCED
+    {num:'Q22',section:'advanced',title:'Below State Average Income — Not Yet Applied',
+     badge:'Advanced · Correlated Subquery',
+     desc:'Correlated subquery finds verified citizens below their state average income who have never applied — primary outreach targets.',
+     sql:`SELECT c.citizen_id, c.full_name, c.state,
+       c.annual_income, c.category
+FROM Citizen c
+WHERE c.annual_income < (
+  SELECT AVG(annual_income) FROM Citizen c2
+  WHERE c2.state = c.state
+)
+AND NOT EXISTS (
+  SELECT 1 FROM Application a WHERE a.citizen_id = c.citizen_id
+)
+AND c.is_verified = 'Y'
+ORDER BY c.annual_income ASC;`,
+     result:tbl(['ID','Name','State','Income','Category'],q22rows)+
+       `<div class="result-count">Total outreach targets: ${cits.filter(c=>{
+         const avg=stateAvgIncome(c.state); return c.income<avg&&!new Set(apps.map(a=>a.citizenId)).has(c.id)&&c.verified==='Y';}).length}</div>`},
+
+    {num:'Q23',section:'advanced',title:'Fraud Detection — High Income on BPL Schemes',
+     badge:'Advanced · Fraud · JOIN',
+     desc:'Citizens with income > ₹5L who applied for BPL-targeted schemes (Kisan Samman, Gramin Awas, Ujjwala) — potential fraud.',
+     sql:`SELECT c.full_name, c.aadhaar_number, c.annual_income,
+       c.category, s.scheme_name, a.status, a.apply_date
+FROM Application a
+JOIN Citizen c ON a.citizen_id = c.citizen_id
+JOIN Scheme s  ON a.scheme_id  = s.scheme_id
+WHERE c.annual_income > 500000
+  AND s.scheme_id IN (1, 2, 5)
+ORDER BY c.annual_income DESC;`,
+     result:tbl(['Name','Aadhaar','Income','Category','Scheme','Status','Applied'],q23rows)+
+       `<div class="result-count" style="color:var(--red);font-weight:600;">⚠️ ${apps.filter(a=>a.citizen.income>500000&&[1,2,5].includes(a.schemeId)).length} potential fraud cases detected</div>`},
+
+    {num:'Q24',section:'advanced',title:'Officer Approval Rate and Processing Time',
+     badge:'Advanced · NULLIF · HAVING',
+     desc:'Measures officer performance — approval rate and average processing days.',
+     sql:`SELECT o.officer_name, o.assigned_state,
+       COUNT(a.application_id) AS handled,
+       SUM(CASE WHEN a.status IN ('APPROVED','DISBURSED') THEN 1 ELSE 0 END) AS approved,
+       SUM(CASE WHEN a.status = 'REJECTED' THEN 1 ELSE 0 END) AS rejected,
+       ROUND(
+         SUM(CASE WHEN a.status IN ('APPROVED','DISBURSED') THEN 1 ELSE 0 END) * 100.0
+         / NULLIF(COUNT(a.application_id), 0), 1
+       ) AS approval_rate_pct,
+       ROUND(AVG(CASE WHEN a.approval_date IS NOT NULL
+                 THEN a.approval_date - a.apply_date END), 1) AS avg_days_taken
+FROM Officer o
+LEFT JOIN Application a ON o.officer_id = a.officer_id
+GROUP BY o.officer_name, o.assigned_state
+HAVING COUNT(a.application_id) > 0
+ORDER BY approval_rate_pct DESC;`,
+     result:tbl(['Officer','State','Handled','Approved','Rejected','Approval %','Avg Days'],q24rows)},
+
+    {num:'Q25',section:'advanced',title:'Top 5 Schemes by Total Amount Disbursed',
+     badge:'Advanced · FETCH FIRST',
+     desc:'Ranks top 5 schemes by cumulative disbursement — highest financial reach.',
+     sql:`SELECT s.scheme_name,
+       NVL(SUM(fd.amount), 0) AS total_disbursed
+FROM Scheme s
+LEFT JOIN Application a ON s.scheme_id = a.scheme_id
+LEFT JOIN Fund_Disbursement fd ON a.application_id = fd.application_id
+GROUP BY s.scheme_name
+ORDER BY total_disbursed DESC
+FETCH FIRST 5 ROWS ONLY;`,
+     result:tbl(['Scheme Name','Total Disbursed'],q25rows)},
+
+    {num:'Q26',section:'advanced',title:'Unverified Citizens With Pending Applications',
+     badge:'Advanced · JOIN · WHERE multi',
+     desc:'Citizens with unverified documents who have active pending applications — compliance risk.',
+     sql:`SELECT c.citizen_id, c.full_name, c.aadhaar_number,
+       c.is_verified, a.application_id, s.scheme_name, a.status
+FROM Citizen c
+JOIN Application a ON c.citizen_id = a.citizen_id
+JOIN Scheme s ON a.scheme_id = s.scheme_id
+WHERE c.is_verified = 'N'
+  AND a.status IN ('SUBMITTED','UNDER_REVIEW')
+ORDER BY a.apply_date ASC;`,
+     result:tbl(['ID','Name','Aadhaar','Verified','App ID','Scheme','Status'],q26rows)},
+
+    {num:'Q27',section:'advanced',title:'Applications With No Assigned Officer',
+     badge:'Advanced · IS NULL · Days waiting',
+     desc:'Pending applications not yet assigned — identifies workload allocation gaps.',
+     sql:`SELECT a.application_id, c.full_name,
+       s.scheme_name, a.status, a.apply_date,
+       TRUNC(SYSDATE - a.apply_date) AS days_unassigned
+FROM Application a
+JOIN Citizen c ON a.citizen_id = c.citizen_id
+JOIN Scheme s ON a.scheme_id = s.scheme_id
+WHERE a.officer_id IS NULL
+  AND a.status IN ('SUBMITTED','UNDER_REVIEW')
+ORDER BY days_unassigned DESC;`,
+     result:tbl(['App ID','Citizen','Scheme','Status','Applied','Days Unassigned'],q27rows)},
+
+    {num:'Q28',section:'advanced',title:'Audit Trail for a Specific Application',
+     badge:'Advanced · Audit Log',
+     desc:'Complete status history for one application — for accountability and dispute resolution. (Showing APP-0001)',
+     sql:`SELECT al.audit_id, al.application_id,
+       al.old_status, al.new_status,
+       al.changed_by, al.change_date
+FROM Application_Audit_Log al
+WHERE al.application_id = 1
+ORDER BY al.change_date ASC;`,
+     result:tbl(['Audit ID','App ID','Old Status','New Status','Changed By','Date'],q28rows)},
+
+    {num:'Q29',section:'advanced',title:'Department-wise Total Budget and Disbursement',
+     badge:'Advanced · Rollup · %',
+     desc:'Ministry-level financial rollup — how much of each ministry budget has been spent.',
+     sql:`SELECT d.department_name,
+       COUNT(s.scheme_id) AS total_schemes,
+       SUM(sfp.total_budget) AS total_budget,
+       SUM(sfp.disbursed_amount) AS total_disbursed,
+       ROUND(SUM(sfp.disbursed_amount) * 100.0
+         / NULLIF(SUM(sfp.total_budget), 0), 2) AS utilization_pct
+FROM Department d
+JOIN Scheme s ON d.department_id = s.department_id
+JOIN Scheme_Fund_Pool sfp ON s.scheme_id = sfp.scheme_id
+GROUP BY d.department_name
+ORDER BY total_disbursed DESC;`,
+     result:tbl(['Department','Schemes','Total Budget','Disbursed','Utilization %'],q29rows)},
+
+    {num:'Q30',section:'advanced',title:'Full Application Pipeline View',
+     badge:'Advanced · Full JOIN',
+     desc:'End-to-end view: citizen profile + scheme + status + payment in one result set.',
+     sql:`SELECT c.full_name, c.state, c.category,
+       s.scheme_name, a.status,
+       a.priority_score, a.apply_date, a.approval_date,
+       fd.amount AS disbursed_amount, fd.transaction_ref
+FROM Application a
+JOIN Citizen c ON a.citizen_id = c.citizen_id
+JOIN Scheme s  ON a.scheme_id  = s.scheme_id
+LEFT JOIN Fund_Disbursement fd ON a.application_id = fd.application_id
+ORDER BY a.priority_score DESC, a.apply_date ASC;`,
+     result:tbl(['Name','State','Cat','Scheme','Status','Score','Applied','Approved','Amount','Txn'],q30rows)},
+  ];
+}
+
+// helper used by Q22
+function stateAvgIncome(state){
+  const sc=CITIZENS.filter(c=>c.state===state);
+  if(!sc.length) return 0;
+  return sc.reduce((s,c)=>s+c.income,0)/sc.length;
+}
+
+// ── RENDER BACKEND TAB ────────────────────────────────────
+function renderBackend(){
+  renderDDL();
+  renderPLSQL();
+  renderQueryCards();
+}
+
+function renderDDL(){
+  const container = document.getElementById('ddl-cards');
+  if(!container) return;
+  container.innerHTML = '';
+
+  DDL_TABLES.forEach(t=>{
+    let colRows='';
+    t.cols.forEach(([col,dtype,constraint,note])=>{
+      const isPK=constraint.includes('PRIMARY');
+      const isFK=constraint.includes('FK');
+      colRows+=`<tr>
+        <td class="${isPK?'col-pk':isFK?'col-fk':''}">${col}</td>
+        <td>${dtype}</td>
+        <td class="col-check">${constraint}</td>
+        <td style="font-size:10.5px;color:var(--text-s);">${note}</td>
+      </tr>`;
+    });
+
+    container.innerHTML+=`
+    <div class="be-card">
+      <div class="be-card-head">
+        <h4>📋 ${t.name}</h4>
+        <span class="be-badge">${t.cols.length} columns</span>
+      </div>
+      <div class="be-card-body">
+        <div class="be-desc">${t.desc}</div>
+        <div class="sql-block">${sqlHL(t.sql)}</div>
+        <div class="result-label">Column Definitions</div>
+        <div style="overflow-x:auto;">
+          <table class="ddl-table">
+            <thead><tr><th>Column</th><th>Data Type</th><th>Constraints</th><th>Notes</th></tr></thead>
+            <tbody>${colRows}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+  });
+}
+
+function renderPLSQL(){
+  const container = document.getElementById('plsql-cards');
+  if(!container) return;
+  container.innerHTML = '';
+
+  const sections=[
+    {key:'fn',   label:'Functions (5)',   icon:'⚡'},
+    {key:'proc', label:'Stored Procedures (5)', icon:'⚙️'},
+    {key:'trig', label:'Triggers (3)',    icon:'🔔'},
+  ];
+
+  sections.forEach(sec=>{
+    const items=PLSQL_ITEMS.filter(p=>p.type===sec.key);
+    if(!items.length) return;
+
+    container.innerHTML+=`<div class="q-section-head">${sec.icon} ${sec.label}</div>`;
+
+    items.forEach(p=>{
+      container.innerHTML+=`
+      <div class="be-card">
+        <div class="be-card-head">
+          <h4>${p.name} <span class="plsql-type pt-${p.type}">${p.typeLabel}</span></h4>
+          <span class="be-badge">${p.type==='fn'?'RETURN VALUE':p.type==='proc'?'PROCEDURE':'TRIGGER'}</span>
+        </div>
+        <div class="be-card-body">
+          <div class="be-desc">${p.desc}</div>
+          <div class="sql-block">${sqlHL(p.sql)}</div>
+        </div>
+      </div>`;
+    });
+  });
+}
+
+function renderQueryCards(){
+  const container = document.getElementById('query-cards');
+  if(!container) return;
+  container.innerHTML = '';
+
+  const sections=[
+    {key:'basic',    label:'Section 1 — Basic Validation Queries (Q1–Q7)',   n:'1'},
+    {key:'business', label:'Section 2 — Business Logic Queries (Q8–Q14)',    n:'2'},
+    {key:'analytics',label:'Section 3 — Analytics & Insights (Q15–Q21)',     n:'3'},
+    {key:'advanced', label:'Section 4 — Advanced Queries (Q22–Q30)',         n:'4'},
+  ];
+
+  const queries = buildQueries();
+
+  sections.forEach(sec=>{
+    container.innerHTML+=`<div class="q-section-head">§${sec.n} ${sec.label.split('—')[1]||sec.label}</div>`;
+    const sqs=queries.filter(q=>q.section===sec.key);
+    sqs.forEach(q=>{
+      container.innerHTML+=`
+      <div class="be-card q-card" data-section="${sec.key}">
+        <div class="be-card-head">
+          <h4>${q.num}. ${q.title}</h4>
+          <span class="be-badge">${q.badge}</span>
+        </div>
+        <div class="be-card-body">
+          <div class="be-desc">${q.desc}</div>
+          <div class="sql-block">${sqlHL(q.sql)}</div>
+          <div class="result-label">Live Result (from JS dataset)</div>
+          ${q.result}
+        </div>
+      </div>`;
+    });
+  });
+}
+</script>
+</div><!-- /main -->
+
+<!-- ── ADD CITIZEN MODAL ── -->
+<div class="modal-overlay" id="modal-add-citizen">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Register New Citizen</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-citizen')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row fr2">
+        <div class="fg"><label>Full Name <span class="req">*</span></label><input id="nc-name" placeholder="Full name"/></div>
+        <div class="fg"><label>Aadhaar (12 digits) <span class="req">*</span></label><input id="nc-aadhaar" maxlength="12" placeholder="700000000000"/></div>
+      </div>
+      <div class="form-row fr3">
+        <div class="fg"><label>Age <span class="req">*</span></label><input id="nc-age" type="number" min="18" max="100" placeholder="35"/></div>
+        <div class="fg"><label>Gender <span class="req">*</span></label>
+          <select id="nc-gender"><option value="">Select</option><option value="M">Male</option><option value="F">Female</option></select>
+        </div>
+        <div class="fg"><label>Category <span class="req">*</span></label>
+          <select id="nc-cat"><option value="">Select</option><option>SC</option><option>ST</option><option>OBC</option><option>GEN</option></select>
+        </div>
+      </div>
+      <div class="form-row fr2">
+        <div class="fg"><label>Annual Income (₹) <span class="req">*</span></label><input id="nc-income" type="number" placeholder="85000"/></div>
+        <div class="fg"><label>Occupation</label>
+          <select id="nc-occ">
+            <option>Farmer</option><option>Agricultural Labourer</option><option>Daily Wage Labourer</option>
+            <option>Small Trader</option><option>Government Employee</option><option>Private Sector Employee</option>
+            <option>Self Employed</option><option>Student</option><option>Unemployed</option><option>Retired</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row fr2">
+        <div class="fg"><label>Land Holding (acres)</label><input id="nc-land" type="number" step="0.1" placeholder="0"/></div>
+        <div class="fg"><label>Location Type <span class="req">*</span></label>
+          <select id="nc-loc"><option value="">Select</option><option value="RURAL">Rural</option><option value="URBAN">Urban</option></select>
+        </div>
+      </div>
+      <div class="form-row fr3">
+        <div class="fg"><label>State <span class="req">*</span></label>
+          <select id="nc-state">
+            <option value="">Select</option>
+            <option>Uttar Pradesh</option><option>Maharashtra</option><option>Bihar</option>
+            <option>West Bengal</option><option>Madhya Pradesh</option><option>Rajasthan</option>
+            <option>Tamil Nadu</option><option>Karnataka</option><option>Gujarat</option>
+            <option>Andhra Pradesh</option><option>Punjab</option><option>Haryana</option>
+            <option>Odisha</option><option>Jharkhand</option><option>Chhattisgarh</option>
+            <option>Kerala</option><option>Assam</option><option>Telangana</option>
+            <option>Uttarakhand</option><option>Himachal Pradesh</option>
+          </select>
+        </div>
+        <div class="fg"><label>District</label><input id="nc-district" placeholder="e.g. Varanasi"/></div>
+        <div class="fg"><label>Village / Town</label><input id="nc-village" placeholder="Village name"/></div>
+      </div>
+      <div class="form-row fr2">
+        <div class="fg"><label>Bank Account <span class="req">*</span></label><input id="nc-bank" placeholder="Account number"/></div>
+        <div class="fg"><label>IFSC Code</label><input id="nc-ifsc" placeholder="SBIN0001234"/></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-citizen')">Cancel</button>
+      <button class="btn btn-teal" onclick="saveCitizen()">Register Citizen →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── REJECT MODAL ── -->
+<div class="modal-overlay" id="modal-reject">
+  <div class="modal" style="width:380px;">
+    <div class="modal-head">
+      <h3>Reject Application</h3>
+      <button class="modal-close" onclick="closeModal('modal-reject')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <label>Reason for Rejection <span class="req">*</span></label>
+        <select id="rej-reason">
+          <option value="">Select reason</option>
+          <option>Income exceeds scheme limit</option>
+          <option>Category not eligible for this scheme</option>
+          <option>Documents insufficient or invalid</option>
+          <option>Already beneficiary of conflicting scheme</option>
+          <option>Land holding does not meet criteria</option>
+          <option>Age outside eligible range</option>
+          <option>Location type mismatch (Rural/Urban)</option>
+          <option>Application found to be duplicate</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="fg mt8">
+        <label>Additional Notes</label>
+        <textarea id="rej-notes" rows="2" placeholder="Optional remarks..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modal-reject')">Cancel</button>
+      <button class="btn btn-red" onclick="confirmReject()">Confirm Rejection</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  DATA LAYER
+// ════════════════════════════════════════════════════════
+
+// ════════════════════════════════════════════════════════
+//  PART 1 — DATA LAYER
+//  INSTRUCTIONS: Replace everything in your <script> tag
+//  from the very top down to (but NOT including) the line:
+//  "// ════════════════════ STATE ══════"
+//  Paste this entire block in its place.
+// ════════════════════════════════════════════════════════
+
+// ── OFFICERS (30 + 1 supervisor at top) ──────────────────
+const OFFICERS = [
+  // Supervisor sees everything
+  {id:0,  name:"Central Supervisor",      code:"SUP000", dept:"ALL",        designation:"Central Monitoring Authority", district:"ALL",              state:"ALL",           isSupervisor:true},
+  {id:1,  name:"Rajendra Kumar Sharma",   code:"EMP001", dept:"Agriculture", designation:"District Agriculture Officer", district:"Lucknow",          state:"Uttar Pradesh", isSupervisor:false},
+  {id:2,  name:"Sunita Devi Yadav",       code:"EMP002", dept:"Housing",     designation:"Block Development Officer",   district:"Varanasi",          state:"Uttar Pradesh", isSupervisor:false},
+  {id:3,  name:"Amarjit Singh Gill",      code:"EMP003", dept:"Health",      designation:"District Health Officer",     district:"Ludhiana",          state:"Punjab",        isSupervisor:false},
+  {id:4,  name:"Priya Ramesh Nair",       code:"EMP004", dept:"Rural Dev",   designation:"Programme Officer MGNREGS",  district:"Patna",             state:"Bihar",         isSupervisor:false},
+  {id:5,  name:"Mohan Lal Verma",         code:"EMP005", dept:"Agriculture", designation:"Agriculture Extension Officer",district:"Jaipur",           state:"Rajasthan",     isSupervisor:false},
+  {id:6,  name:"Fatima Begum Khan",       code:"EMP006", dept:"WCD",         designation:"CDPO",                       district:"Bhopal",            state:"Madhya Pradesh",isSupervisor:false},
+  {id:7,  name:"Venkatesh Subramaniam",   code:"EMP007", dept:"Energy",      designation:"Solar Energy Manager",       district:"Chennai",           state:"Tamil Nadu",    isSupervisor:false},
+  {id:8,  name:"Kavita Arun Patil",       code:"EMP008", dept:"Housing",     designation:"Housing Welfare Officer",    district:"Pune",              state:"Maharashtra",   isSupervisor:false},
+  {id:9,  name:"Suresh Chandra Meena",    code:"EMP009", dept:"Social Jus.", designation:"Social Welfare Officer",    district:"Ajmer",             state:"Rajasthan",     isSupervisor:false},
+  {id:10, name:"Anitha Krishnaswamy",     code:"EMP010", dept:"Health",      designation:"Primary Health Officer",     district:"Coimbatore",        state:"Tamil Nadu",    isSupervisor:false},
+  {id:11, name:"Gurpreet Singh Bhatia",   code:"EMP011", dept:"Rural Dev",   designation:"Block Level Facilitator",   district:"Amritsar",          state:"Punjab",        isSupervisor:false},
+  {id:12, name:"Dinesh Prasad Dubey",     code:"EMP012", dept:"Agriculture", designation:"Senior Agriculture Officer", district:"Gorakhpur",         state:"Uttar Pradesh", isSupervisor:false},
+  {id:13, name:"Meena Ravi Kumar",        code:"EMP013", dept:"WCD",         designation:"District Women Welfare Off.",district:"Hyderabad",         state:"Telangana",     isSupervisor:false},
+  {id:14, name:"Bikram Jit Mahato",       code:"EMP014", dept:"Rural Dev",   designation:"MGNREGS Programme Officer", district:"Ranchi",            state:"Jharkhand",     isSupervisor:false},
+  {id:15, name:"Sarita Bhatt",            code:"EMP015", dept:"Health",      designation:"Block Medical Officer",      district:"Dehradun",          state:"Uttarakhand",   isSupervisor:false},
+  {id:16, name:"Ramesh Narayan Pillai",   code:"EMP016", dept:"Housing",     designation:"Urban Housing Officer",      district:"Thiruvananthapuram",state:"Kerala",        isSupervisor:false},
+  {id:17, name:"Lakshmi Bai Sahu",        code:"EMP017", dept:"Social Jus.", designation:"Tribal Welfare Officer",    district:"Raipur",            state:"Chhattisgarh",  isSupervisor:false},
+  {id:18, name:"Arjun Dev Thakur",        code:"EMP018", dept:"Energy",      designation:"Renewable Energy Officer",  district:"Shimla",            state:"Himachal Pradesh",isSupervisor:false},
+  {id:19, name:"Parveen Akhtar",          code:"EMP019", dept:"Rural Dev",   designation:"Rural Development Officer", district:"Guwahati",          state:"Assam",         isSupervisor:false},
+  {id:20, name:"Sukhdev Singh Sandhu",    code:"EMP020", dept:"Agriculture", designation:"Kisan Seva Kendra Manager", district:"Bathinda",          state:"Punjab",        isSupervisor:false},
+  {id:21, name:"Geeta Rani Mishra",       code:"EMP021", dept:"WCD",         designation:"Anganwadi Supervisor",      district:"Prayagraj",         state:"Uttar Pradesh", isSupervisor:false},
+  {id:22, name:"Md Iqbal Hussain",        code:"EMP022", dept:"Health",      designation:"District Immunisation Off.",district:"Muzaffarpur",       state:"Bihar",         isSupervisor:false},
+  {id:23, name:"Devika Shankar Rao",      code:"EMP023", dept:"Social Jus.", designation:"SC ST Development Officer", district:"Vijayawada",        state:"Andhra Pradesh",isSupervisor:false},
+  {id:24, name:"Harcharan Singh Mann",    code:"EMP024", dept:"Agriculture", designation:"Agriculture Technology Mgr.",district:"Patiala",          state:"Punjab",        isSupervisor:false},
+  {id:25, name:"Rekha Jha",               code:"EMP025", dept:"Rural Dev",   designation:"Block Programme Manager",   district:"Darbhanga",         state:"Bihar",         isSupervisor:false},
+  {id:26, name:"Anil Shankar Tiwari",     code:"EMP026", dept:"Housing",     designation:"PM Awas Officer",           district:"Agra",              state:"Uttar Pradesh", isSupervisor:false},
+  {id:27, name:"Manjula Devi Nair",       code:"EMP027", dept:"WCD",         designation:"Child Welfare Officer",     district:"Kozhikode",         state:"Kerala",        isSupervisor:false},
+  {id:28, name:"Prakash Rao Desai",       code:"EMP028", dept:"Energy",      designation:"Solar Mission Coordinator", district:"Gandhinagar",       state:"Gujarat",       isSupervisor:false},
+  {id:29, name:"Champa Bai Rawat",        code:"EMP029", dept:"Social Jus.", designation:"Divyang Welfare Coordinator",district:"Indore",           state:"Madhya Pradesh",isSupervisor:false},
+  {id:30, name:"Nandita Ghosh",           code:"EMP030", dept:"Health",      designation:"Health Programme Officer",  district:"Kolkata",           state:"West Bengal",   isSupervisor:false},
+];
+
+// ── SCHEMES (exact match to SQL file) ────────────────────
+const SCHEMES = [
+  {id:1, name:"Kisan Samman Yojana",        code:"KSY-2019",  type:"MAJOR", dept:"Agriculture", base:6000,   max:8000,   budget:75000000000, maxIncome:250000, minIncome:0,      category:"ALL",    location:"ALL",   gender:"ALL", minLand:0.1},
+  {id:2, name:"Gramin Awas Yojana",         code:"GAY-2016",  type:"MAJOR", dept:"Housing",     base:120000, max:250000, budget:54000000000, maxIncome:300000, minIncome:0,      category:"ALL",    location:"RURAL", gender:"ALL", minLand:0},
+  {id:3, name:"Swasthya Suraksha Yojana",   code:"SSY-2018",  type:"MAJOR", dept:"Health",      base:300000, max:500000, budget:76000000000, maxIncome:500000, minIncome:0,      category:"ALL",    location:"ALL",   gender:"ALL", minLand:0},
+  {id:4, name:"Gramin Rozgar Guarantee",    code:"GRGS-2005", type:"MAJOR", dept:"Rural Dev",   base:15000,  max:25000,  budget:89000000000, maxIncome:null,   minIncome:0,      category:"ALL",    location:"RURAL", gender:"ALL", minLand:0},
+  {id:5, name:"Ujjwala Rasoi Yojana",       code:"URY-2016",  type:"MAJOR", dept:"Rural Dev",   base:1600,   max:3200,   budget:16000000000, maxIncome:200000, minIncome:0,      category:"ALL",    location:"ALL",   gender:"F",   minLand:0},
+  {id:6, name:"Surya Shakti Solar Subsidy", code:"SSSS-2024", type:"MINOR", dept:"Energy",      base:30000,  max:78000,  budget:7500000000,  maxIncome:1500000,minIncome:100000, category:"ALL",    location:"ALL",   gender:"ALL", minLand:0},
+  {id:7, name:"Naari Shakti Udyam Yojana",  code:"NSUY-2020", type:"MINOR", dept:"WCD",         base:50000,  max:100000, budget:2000000000,  maxIncome:500000, minIncome:0,      category:"SC,ST,OBC",location:"ALL", gender:"F",   minLand:0},
+  {id:8, name:"SC ST Scholarship Scheme",   code:"SCSS-2008", type:"MINOR", dept:"Social Jus.", base:12000,  max:36000,  budget:4500000000,  maxIncome:250000, minIncome:0,      category:"SC,ST",  location:"ALL",   gender:"ALL", minLand:0},
+  {id:9, name:"Kisan Yantra Anudan",        code:"KYA-2021",  type:"MINOR", dept:"Agriculture", base:25000,  max:100000, budget:3500000000,  maxIncome:350000, minIncome:0,      category:"ALL",    location:"ALL",   gender:"ALL", minLand:0.5},
+  {id:10,name:"Divyang Sahayata Yojana",    code:"DSY-2015",  type:"MINOR", dept:"Social Jus.", base:3000,   max:10000,  budget:800000000,   maxIncome:null,   minIncome:0,      category:"ALL",    location:"ALL",   gender:"ALL", minLand:0},
+];
+
+// track disbursements per scheme (mirrors Scheme_Fund_Pool)
+const fundDisbursed = {};
+SCHEMES.forEach(s => fundDisbursed[s.id] = 0);
+
+// ── NAME ARRAYS (hand-curated, matches SQL procedure) ────
+const MALE_NAMES = [
+  "Rajesh","Suresh","Dinesh","Ramesh","Mahesh","Naresh","Umesh","Ganesh","Mukesh","Arjun",
+  "Devendra","Pradeep","Santosh","Harish","Manish","Anil","Vijay","Ajay","Sanjay","Ranjit",
+  "Gurpreet","Amarjit","Harpreet","Baldev","Kuldeep","Jaswant","Mohammad","Imran","Farhan",
+  "Salman","Irfan","Riyaz","Venkatesh","Krishnaswamy","Ramamurthy","Balakrishnan","Subramaniam",
+  "Bikash","Debashish","Partha","Sourav","Prasanta","Rohit","Amit","Vikas","Ashok","Pramod",
+  "Hemant","Deepak","Shyam","Govind","Brijesh","Yogendra","Virendra","Satendra","Ramakant",
+  "Shivaji","Girish","Pankaj","Manoj","Rakesh","Navin","Kailash","Bharat","Chetan","Sunil"
+];
+const FEMALE_NAMES = [
+  "Sunita","Anita","Kavita","Savita","Sangita","Mamta","Seema","Geeta","Rekha","Usha",
+  "Meena","Asha","Nisha","Mina","Lata","Sita","Manju","Saroj","Gurpreet","Manpreet",
+  "Simranjit","Paramjit","Fatima","Aisha","Rukhsar","Shabana","Nasreen","Yasmin","Zubeida",
+  "Lakshmi","Saraswati","Kamala","Radha","Meenakshi","Vijayalakshmi","Sudha","Rohini","Sushma",
+  "Shanta","Vimala","Jayashree","Champa","Pushpa","Kusum","Madhuri","Vandana","Archana","Swati",
+  "Priya","Pooja","Neha","Divya","Deepa","Ritu","Poonam","Sapna","Monika","Preeti","Shobha"
+];
+const SURNAMES = [
+  "Sharma","Verma","Gupta","Singh","Kumar","Yadav","Patel","Shah","Joshi","Mishra",
+  "Tiwari","Dubey","Pandey","Shukla","Srivastava","Rao","Reddy","Naidu","Iyer","Pillai",
+  "Nair","Menon","Krishnan","Das","Dutta","Ghosh","Banerjee","Chatterjee","Mukherjee","Bose",
+  "Gill","Sidhu","Mann","Grewal","Dhillon","Brar","Sandhu","Chahal","Khan","Ansari",
+  "Shaikh","Qureshi","Siddiqui","Malik","Chaudhary","Meena","Bhil","Gond","Munda","Lodhi",
+  "Mahato","Sahu","Thakur","Rawat","Bisht","Negi","Chauhan","Rathore","Desai","Mehta",
+  "Jadhav","Patil","More","Shinde","Kamble","Pawar","Bhosale","Naik","Kulkarni","Jain"
+];
+
+// states weighted by population (matches SQL v_states array)
+const STATES_W = [
+  "Uttar Pradesh","Uttar Pradesh","Uttar Pradesh","Uttar Pradesh","Uttar Pradesh",
+  "Uttar Pradesh","Uttar Pradesh","Uttar Pradesh","Uttar Pradesh","Uttar Pradesh",
+  "Uttar Pradesh","Uttar Pradesh","Uttar Pradesh","Uttar Pradesh","Uttar Pradesh",
+  "Uttar Pradesh","Uttar Pradesh",
+  "Maharashtra","Maharashtra","Maharashtra","Maharashtra","Maharashtra",
+  "Maharashtra","Maharashtra","Maharashtra","Maharashtra",
+  "Bihar","Bihar","Bihar","Bihar","Bihar","Bihar","Bihar","Bihar","Bihar",
+  "West Bengal","West Bengal","West Bengal","West Bengal","West Bengal",
+  "West Bengal","West Bengal","West Bengal",
+  "Madhya Pradesh","Madhya Pradesh","Madhya Pradesh","Madhya Pradesh","Madhya Pradesh",
+  "Rajasthan","Rajasthan","Rajasthan","Rajasthan","Rajasthan",
+  "Tamil Nadu","Tamil Nadu","Tamil Nadu","Tamil Nadu",
+  "Karnataka","Karnataka","Karnataka",
+  "Gujarat","Gujarat","Gujarat",
+  "Andhra Pradesh","Andhra Pradesh",
+  "Odisha","Odisha",
+  "Telangana","Telangana",
+  "Punjab","Punjab","Punjab",
+  "Jharkhand",
+  "Chhattisgarh",
+  "Assam",
+  "Haryana","Haryana",
+  "Kerala",
+  "Uttarakhand",
+  "Himachal Pradesh"
+];
+
+const DISTRICTS_MAP = {
+  "Uttar Pradesh":    ["Lucknow","Varanasi","Agra","Kanpur","Prayagraj","Gorakhpur","Meerut","Bareilly","Aligarh","Moradabad","Mathura","Jhansi","Ghaziabad","Saharanpur","Muzaffarnagar","Firozabad","Etawah"],
+  "Maharashtra":      ["Pune","Mumbai","Nagpur","Nashik","Aurangabad","Kolhapur","Solapur","Amravati","Latur"],
+  "Bihar":            ["Patna","Gaya","Muzaffarpur","Darbhanga","Bhagalpur","Purnia","Arrah","Begusarai","Nalanda"],
+  "West Bengal":      ["Kolkata","Howrah","Burdwan","Murshidabad","Nadia","Malda","Jalpaiguri","Midnapore"],
+  "Madhya Pradesh":   ["Bhopal","Indore","Gwalior","Jabalpur","Sagar"],
+  "Rajasthan":        ["Jaipur","Jodhpur","Udaipur","Ajmer","Bikaner"],
+  "Tamil Nadu":       ["Chennai","Coimbatore","Madurai","Salem"],
+  "Karnataka":        ["Bengaluru","Mysuru","Hubballi"],
+  "Gujarat":          ["Ahmedabad","Surat","Vadodara"],
+  "Andhra Pradesh":   ["Visakhapatnam","Vijayawada"],
+  "Odisha":           ["Bhubaneswar","Cuttack"],
+  "Telangana":        ["Hyderabad","Warangal"],
+  "Punjab":           ["Ludhiana","Amritsar","Patiala","Bathinda"],
+  "Jharkhand":        ["Ranchi","Dhanbad"],
+  "Chhattisgarh":     ["Raipur","Bilaspur"],
+  "Assam":            ["Guwahati","Dibrugarh"],
+  "Haryana":          ["Gurugram","Faridabad"],
+  "Kerala":           ["Thiruvananthapuram","Kozhikode"],
+  "Uttarakhand":      ["Dehradun","Haridwar"],
+  "Himachal Pradesh": ["Shimla","Dharamshala"]
+};
+
+// category distribution matching SQL (SC~17%, ST~8%, OBC~40%, GEN~35%)
+const CATEGORIES_W = [
+  "SC","SC","SC","SC","SC","SC","SC","SC","SC","SC","SC","SC","SC","SC","SC","SC","SC",
+  "ST","ST","ST","ST","ST","ST","ST","ST",
+  "OBC","OBC","OBC","OBC","OBC","OBC","OBC","OBC","OBC","OBC",
+  "OBC","OBC","OBC","OBC","OBC","OBC","OBC","OBC","OBC","OBC",
+  "OBC","OBC","OBC","OBC","OBC","OBC","OBC","OBC","OBC","OBC",
+  "OBC","OBC","OBC","OBC","OBC","OBC","OBC","OBC","OBC","OBC",
+  "GEN","GEN","GEN","GEN","GEN","GEN","GEN","GEN","GEN","GEN",
+  "GEN","GEN","GEN","GEN","GEN","GEN","GEN","GEN","GEN","GEN",
+  "GEN","GEN","GEN","GEN","GEN","GEN","GEN","GEN","GEN","GEN",
+  "GEN","GEN","GEN","GEN","GEN"
+];
+
+const OCCUPATIONS = [
+  "Farmer","Farmer","Farmer","Farmer","Agricultural Labourer","Agricultural Labourer",
+  "Daily Wage Labourer","Daily Wage Labourer","Construction Worker","Small Trader",
+  "Shopkeeper","Hawker","Tailor","Weaver","Government Employee","Private Sector Employee",
+  "Self Employed","Artisan","Potter","Driver","Teacher","Health Worker",
+  "ASHA Worker","Student","Unemployed","Retired","Domestic Worker","Mechanic"
+];
+
+const IFSC_CODES = [
+  "SBIN0001234","SBIN0005678","PUNB0012300","PUNB0056700",
+  "UBIN0012345","BKID0001234","CNRB0001234","HDFC0001234",
+  "ICIC0001234","BARB0001234","MAHB0001234","IOBA0001234"
+];
+
+// ── Utility functions ─────────────────────────────────────
+function rnd(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function rndInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function rndFloat(a,b,d){ return parseFloat((Math.random()*(b-a)+a).toFixed(d)); }
+
+// ── GENERATE 1000 CITIZENS (mirrors SQL generate_citizen_data) ──
+let cidSeq = 1;
+const CITIZENS = [];
+
+(function generateCitizens(){
+  // seed for reproducibility feel
+  for(let i = 0; i < 1000; i++){
+    // gender: ~51.5% male, ~48.5% female (Census 2011)
+    const gender = Math.random() < 0.515 ? 'M' : 'F';
+    const fname  = gender === 'M' ? rnd(MALE_NAMES) : rnd(FEMALE_NAMES);
+    const lname  = rnd(SURNAMES);
+
+    // age distribution: 45% young (18-35), 35% mid (36-55), 20% senior (56-75)
+    const ageRand = Math.random() * 100;
+    let age;
+    if(ageRand <= 45)      age = rndInt(18, 35);
+    else if(ageRand <= 80) age = rndInt(36, 55);
+    else                   age = rndInt(56, 75);
+
+    const category = rnd(CATEGORIES_W);
+
+    // state weighted by population
+    const state    = rnd(STATES_W);
+    const dists    = DISTRICTS_MAP[state] || ["District"];
+    const district = rnd(dists);
+
+    // rural/urban: 65% rural (Census 2011)
+    const location = Math.random() < 0.65 ? 'RURAL' : 'URBAN';
+    const village  = location === 'RURAL'
+      ? 'Village-' + rndInt(1, 999)
+      : district;
+
+    // income: right-skewed (matches SQL v_inc_rand logic)
+    // 40% BPL, 30% low, 15% lower-mid, 10% mid, 5% high
+    const incRand = Math.random() * 100;
+    let income;
+    if(incRand <= 40)      income = rndInt(20000,  100000);
+    else if(incRand <= 70) income = rndInt(100000, 250000);
+    else if(incRand <= 85) income = rndInt(250000, 500000);
+    else if(incRand <= 95) income = rndInt(500000, 1000000);
+    else                   income = rndInt(1000000, 3000000);
+
+    const occupation = rnd(OCCUPATIONS);
+    const land = (occupation === 'Farmer' || occupation === 'Agricultural Labourer')
+      ? rndFloat(0.3, 8, 1) : 0;
+
+    // verified: 70% are verified (matches SQL is_verified logic)
+    const verified = Math.random() > 0.30 ? 'Y' : 'N';
+
+    // registration date: random in last 2 years
+    const regDaysAgo = rndInt(0, 730);
+    const regDate = new Date();
+    regDate.setDate(regDate.getDate() - regDaysAgo);
+
+    CITIZENS.push({
+      id:       cidSeq++,
+      aadhaar:  String(700000000000 + i).padStart(12, '0'),
+      name:     fname + ' ' + lname,
+      age, gender, category, income,
+      occupation, land, location,
+      village, district, state,
+      bank:     'ACCT' + String(i + 1).padStart(12, '0'),
+      ifsc:     rnd(IFSC_CODES),
+      verified,
+      regDate:  regDate.toLocaleDateString('en-IN'),
+      pincode:  String(rndInt(110001, 799999))
+    });
+  }
+})();
+
+// ── ELIGIBILITY CHECK (exact mirror of SQL check_eligibility) ──
+function checkEligibility(citizen, scheme){
+  // income upper bound
+  if(scheme.maxIncome !== null && citizen.income > scheme.maxIncome)
+    return { ok: false, reason: `Income ₹${citizen.income.toLocaleString('en-IN')} exceeds scheme limit ₹${scheme.maxIncome.toLocaleString('en-IN')}` };
+
+  // income lower bound (solar scheme)
+  if(scheme.minIncome && citizen.income < scheme.minIncome)
+    return { ok: false, reason: `Income ₹${citizen.income.toLocaleString('en-IN')} below minimum ₹${scheme.minIncome.toLocaleString('en-IN')}` };
+
+  // location check
+  if(scheme.location !== 'ALL' && citizen.location !== scheme.location)
+    return { ok: false, reason: `Scheme requires ${scheme.location} residents. Citizen is ${citizen.location}` };
+
+  // gender check
+  if(scheme.gender !== 'ALL' && citizen.gender !== scheme.gender)
+    return { ok: false, reason: `Scheme restricted to ${scheme.gender === 'F' ? 'female' : 'male'} applicants` };
+
+  // category check
+  if(scheme.category !== 'ALL'){
+    const allowed = scheme.category.split(',');
+    if(!allowed.includes(citizen.category))
+      return { ok: false, reason: `Category ${citizen.category} not eligible. Allowed: ${scheme.category}` };
+  }
+
+  // land check (farmer schemes)
+  if(scheme.minLand > 0 && citizen.land < scheme.minLand)
+    return { ok: false, reason: `Land holding ${citizen.land} acres below minimum ${scheme.minLand} acres` };
+
+  return { ok: true, reason: 'ELIGIBLE' };
+}
+
+// ── BENEFIT CALCULATION (exact mirror of SQL calculate_benefit) ──
+function calcBenefit(citizen, scheme){
+  // income tier factor
+  let factor;
+  if(citizen.income <= 50000)       factor = 1.00;
+  else if(citizen.income <= 150000) factor = 0.88;
+  else if(citizen.income <= 300000) factor = 0.75;
+  else if(citizen.income <= 500000) factor = 0.60;
+  else                              factor = 0.40;
+
+  let benefit = scheme.base * factor;
+
+  // category bonus (SC/ST: +20%, OBC: +10%)
+  if(citizen.category === 'SC' || citizen.category === 'ST') benefit *= 1.20;
+  else if(citizen.category === 'OBC')                        benefit *= 1.10;
+
+  // rural bonus: +8%
+  if(citizen.location === 'RURAL') benefit *= 1.08;
+
+  // elderly bonus: +12% for age >= 60
+  if(citizen.age >= 60) benefit *= 1.12;
+
+  // cap at max
+  return Math.min(Math.round(benefit), scheme.max);
+}
+
+// ── PRIORITY SCORE (exact mirror of SQL get_priority_score) ──
+function calcPriority(citizen){
+  let score = 0;
+
+  // income: up to 50 pts (lower = higher score)
+  if(citizen.income <= 50000)       score += 50;
+  else if(citizen.income <= 100000) score += 44;
+  else if(citizen.income <= 200000) score += 36;
+  else if(citizen.income <= 350000) score += 26;
+  else if(citizen.income <= 500000) score += 16;
+  else                              score += 5;
+
+  // category: ST=25, SC=22, OBC=14, GEN=5
+  if(citizen.category === 'ST')       score += 25;
+  else if(citizen.category === 'SC')  score += 22;
+  else if(citizen.category === 'OBC') score += 14;
+  else                                score += 5;
+
+  // location: rural=15, urban=5
+  score += citizen.location === 'RURAL' ? 15 : 5;
+
+  // age 60+: +10
+  if(citizen.age >= 60) score += 10;
+
+  return score;
+}
+
+// ── GENERATE 400-500 APPLICATIONS ────────────────────────
+// mirrors SQL generate_sample_applications with 3 cursors
+let appSeq   = 1;
+const APPLICATIONS = [];
+const usedPairs    = new Set(); // enforce UNIQUE(citizen_id, scheme_id)
+
+// status distribution matching SQL weighted list
+// 'SUBMITTED','SUBMITTED','UNDER_REVIEW','APPROVED','APPROVED','REJECTED','DISBURSED'
+const STATUS_DIST = ['SUBMITTED','SUBMITTED','UNDER_REVIEW','APPROVED','APPROVED','REJECTED','DISBURSED'];
+
+// helper: assign officer matching scheme dept + citizen state where possible
+function assignOfficer(citizen, scheme){
+  // try to find officer with matching state + dept
+  const match = OFFICERS.filter(o =>
+    !o.isSupervisor &&
+    o.state === citizen.state &&
+    o.dept === scheme.dept
+  );
+  if(match.length) return rnd(match);
+
+  // fallback: same state any dept
+  const stateFall = OFFICERS.filter(o => !o.isSupervisor && o.state === citizen.state);
+  if(stateFall.length) return rnd(stateFall);
+
+  // last resort: any officer
+  return rnd(OFFICERS.filter(o => !o.isSupervisor));
+}
+
+(function generateApplications(){
+  // Cursor 1: c_farmers → Kisan Samman Yojana (scheme 1)
+  // farmers, land 0.1-5 acres, income < 250000, up to 200
+  const farmers = CITIZENS.filter(c =>
+    (c.occupation === 'Farmer' || c.occupation === 'Agricultural Labourer') &&
+    c.land >= 0.1 && c.land <= 5 &&
+    c.income < 250000
+  ).slice(0, 200);
+
+  farmers.forEach(c => pushApp(c, SCHEMES[0]));
+
+  // Cursor 2: c_bpl_rural → Gramin Awas Yojana (scheme 2)
+  // rural, income < 100000, up to 150
+  const bplRural = CITIZENS.filter(c =>
+    c.income < 100000 && c.location === 'RURAL' &&
+    !usedPairs.has(c.id + '-2')
+  ).slice(0, 150);
+
+  bplRural.forEach(c => pushApp(c, SCHEMES[1]));
+
+  // Cursor 3: c_health → Swasthya Suraksha (scheme 3)
+  // income < 500000, up to 200
+  const health = CITIZENS.filter(c =>
+    c.income < 500000 &&
+    !usedPairs.has(c.id + '-3')
+  ).slice(0, 200);
+
+  health.forEach(c => pushApp(c, SCHEMES[2]));
+
+  // Additional spread across remaining schemes (4-10)
+  // to reach ~450 total applications
+  let extra = 0;
+  for(let ci = 0; ci < CITIZENS.length && extra < 120; ci++){
+    const c = CITIZENS[ci];
+    // try a random scheme for this citizen
+    const s = SCHEMES[rndInt(3, 9)];
+    const key = c.id + '-' + s.id;
+    if(usedPairs.has(key)) continue;
+    const elig = checkEligibility(c, s);
+    if(!elig.ok) continue;
+    pushApp(c, s);
+    extra++;
+  }
+})();
+
+function pushApp(citizen, scheme){
+  const key = citizen.id + '-' + scheme.id;
+  if(usedPairs.has(key)) return;
+  usedPairs.add(key);
+
+  const status   = rnd(STATUS_DIST);
+  const daysAgo  = rndInt(2, 180);
+  const applyDate = new Date();
+  applyDate.setDate(applyDate.getDate() - daysAgo);
+
+  const elig     = checkEligibility(citizen, scheme);
+  // don't approve ineligible citizens
+  const finalStatus = (!elig.ok && (status === 'APPROVED' || status === 'DISBURSED'))
+    ? 'REJECTED' : status;
+
+  const benefit  = calcBenefit(citizen, scheme);
+  const priority = calcPriority(citizen);
+  const officer  = assignOfficer(citizen, scheme);
+
+  let approvalDate = null;
+  if(finalStatus === 'APPROVED' || finalStatus === 'DISBURSED' || finalStatus === 'REJECTED'){
+    const d = new Date(applyDate);
+    d.setDate(d.getDate() + rndInt(3, 30));
+    approvalDate = d;
+  }
+
+  const app = {
+    id:         appSeq++,
+    citizenId:  citizen.id,
+    citizen,
+    schemeId:   scheme.id,
+    scheme,
+    officerId:  officer.id,
+    officer,
+    applyDate,
+    applyDateStr: applyDate.toLocaleDateString('en-IN'),
+    status:     finalStatus,
+    priority,
+    benefit,
+    rejectionReason: finalStatus === 'REJECTED'
+      ? (elig.ok ? 'Documents insufficient or not verified' : 'Eligibility: ' + elig.reason)
+      : '',
+    txnRef: (finalStatus === 'DISBURSED')
+      ? 'TXN' + applyDate.toISOString().slice(0,10).replace(/-/g,'') + String(appSeq).padStart(8,'0')
+      : null,
+    approvalDate,
+    approvalDateStr: approvalDate ? approvalDate.toLocaleDateString('en-IN') : null,
+    daysAgo,
+    hasOfficer: Math.random() > 0.15  // ~15% unassigned (for Q27)
+  };
+
+  // update fund pool for pre-approved/disbursed
+  if(finalStatus === 'APPROVED' || finalStatus === 'DISBURSED'){
+    fundDisbursed[scheme.id] = (fundDisbursed[scheme.id] || 0) + benefit;
+  }
+
+  // audit log simulation
+  app.auditLog = buildAuditLog(app);
+
+  APPLICATIONS.push(app);
+}
+
+// build audit log for an application (mirrors trg_application_audit)
+function buildAuditLog(app){
+  const log = [];
+  const base = new Date(app.applyDate);
+
+  log.push({ oldStatus: null, newStatus: 'SUBMITTED', changedBy: 'CITIZEN_PORTAL', date: new Date(base) });
+
+  if(app.status === 'UNDER_REVIEW' || app.status === 'APPROVED' || app.status === 'DISBURSED' || app.status === 'REJECTED'){
+    const d = new Date(base); d.setDate(d.getDate() + rndInt(1,5));
+    log.push({ oldStatus:'SUBMITTED', newStatus:'UNDER_REVIEW', changedBy: app.officer.code, date: d });
+  }
+  if(app.status === 'APPROVED' || app.status === 'DISBURSED'){
+    const d = new Date(app.approvalDate);
+    log.push({ oldStatus:'UNDER_REVIEW', newStatus:'APPROVED', changedBy: app.officer.code, date: d });
+  }
+  if(app.status === 'DISBURSED'){
+    const d = new Date(app.approvalDate); d.setDate(d.getDate() + rndInt(1,3));
+    log.push({ oldStatus:'APPROVED', newStatus:'DISBURSED', changedBy: 'DBT_SYSTEM', date: d });
+  }
+  if(app.status === 'REJECTED'){
+    const d = new Date(app.approvalDate);
+    log.push({ oldStatus:'UNDER_REVIEW', newStatus:'REJECTED', changedBy: app.officer.code, date: d });
+  }
+  return log;
+}
+
+// ── ACCESS CONTROL (CRITICAL FIX) ────────────────────────
+// Mirrors the role-based filtering described in requirements.
+// Officers see only apps in their state + district + dept.
+// Supervisor sees everything.
+function getVisibleApplications(officer){
+  if(!officer) return [];
+  if(officer.isSupervisor) return APPLICATIONS;
+
+  return APPLICATIONS.filter(app => {
+    const c = app.citizen;
+    const s = app.scheme;
+    return (
+      c.state    === officer.state    &&
+      c.district === officer.district &&
+      s.dept     === officer.dept
+    );
+  });
+}
+
+// helper used everywhere to get what current officer can see
+function myApps(){
+  return getVisibleApplications(currentOfficer);
+}
+
+// income band helper (used by filters and analytics)
+function incomeGroup(income){
+  if(income <= 100000)  return 'bpl';
+  if(income <= 250000)  return 'low';
+  if(income <= 500000)  return 'mid';
+  return 'high';
+}
+
+function incomeBandLabel(band){
+  return {bpl:'Below ₹1L (BPL)',low:'₹1L–₹2.5L',mid:'₹2.5L–₹5L',high:'Above ₹5L'}[band] || band;
+}
+
+
+// ════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════
+let currentOfficer = null;
+let rejectTargetId = null;
+
+// pagination state
+const pagState = {
+  dash: {page:1, perPage:12, data:[]},
+  cit:  {page:1, perPage:15, data:[]},
+  app:  {page:1, perPage:15, data:[]},
+};
+
+// filter state
+const dashFilters = {};
+const citFilters  = {};
+const appFilters  = {};
+
+// ════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════
+window.onload = function(){
+  // strip time
+  setInterval(()=>{
+    const now = new Date();
+    document.getElementById('strip-time').textContent =
+      now.toLocaleDateString('en-IN')+' · '+now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  },1000);
+
+  // populate officer dropdown
+  const sel = document.getElementById('login-select');
+  OFFICERS.forEach(o=>{
+    const opt = document.createElement('option');
+    opt.value = o.id;
+    opt.textContent = o.name+' — '+o.designation+' ('+o.state+')';
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', previewOfficer);
+
+  // populate state dropdowns
+  const allStates = [...new Set(CITIZENS.map(c=>c.state))].sort();
+  ['df-state','cf-state','af-state'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    allStates.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; el.appendChild(o); });
+  });
+  const ncSt = document.getElementById('nc-state'); // already hardcoded in HTML
+
+  // populate scheme dropdowns
+  ['df-scheme','af-scheme'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    SCHEMES.forEach(s=>{ const o=document.createElement('option'); o.value=s.id; o.textContent=s.name; el.appendChild(o); });
+  });
+
+  // apply scheme page citizen and scheme selects
+  const apCit = document.getElementById('ap-citizen');
+  CITIZENS.forEach(c=>{
+    const o=document.createElement('option'); o.value=c.id;
+    o.textContent=c.name+' ('+c.aadhaar+') — '+c.state;
+    apCit.appendChild(o);
+  });
+  const apSch = document.getElementById('ap-scheme');
+  SCHEMES.forEach(s=>{ const o=document.createElement('option'); o.value=s.id; o.textContent=s.name+' ('+s.code+')'; apSch.appendChild(o); });
+
+  // scheme reference list in apply tab
+  const ref = document.getElementById('scheme-ref-list');
+  SCHEMES.forEach(s=>{
+    const div = document.createElement('div');
+    div.style.cssText='background:var(--teal-l);border-radius:5px;padding:8px 11px;margin-bottom:7px;';
+    div.innerHTML=`<div style="font-weight:600;font-size:12px;color:var(--teal-d);">${s.name}</div>
+    <div style="font-size:11px;color:var(--text-m);margin-top:2px;">
+      ${s.maxIncome?'Income &lt; ₹'+s.maxIncome.toLocaleString('en-IN'):''} 
+      ${s.location!=='ALL'?'· '+s.location:''} 
+      ${s.gender!=='ALL'?'· '+(s.gender==='F'?'Women only':'Men only'):''} 
+      ${s.category!=='ALL'?'· '+s.category:''} 
+      ${s.minLand>0?'· Land ≥ '+s.minLand+' ac':''}
+    </div>`;
+    ref.appendChild(div);
+  });
+};
+
+// ════════════════════════════════════════════════════════
+//  LOGIN
+// ════════════════════════════════════════════════════════
+function previewOfficer(){
+  const id = parseInt(document.getElementById('login-select').value);
+  const o  = OFFICERS.find(x=>x.id===id);
+  const pv = document.getElementById('login-preview');
+  if(!o){ pv.style.display='none'; return; }
+  pv.style.display='block';
+  document.getElementById('lp-name').textContent = o.name;
+  document.getElementById('lp-role').textContent = o.designation+' · '+o.dept;
+  document.getElementById('lp-loc').textContent  = o.district+', '+o.state;
+}
+
+// ════════════════════════════════════════════════════════
+//  LOGIN / LOGOUT
+// ════════════════════════════════════════════════════════
+function doLogin(){
+  const id = parseInt(document.getElementById('login-select').value);
+  const o  = OFFICERS.find(x=>x.id===id);
+  if(!o){ showToast('Please select an officer','err'); return; }
+  currentOfficer = o;
+
+  document.getElementById('ob-name-text').textContent = o.name;
+  document.getElementById('ob-role-text').textContent =
+    o.isSupervisor ? 'National Supervisor · Full Access' : o.designation+' · '+o.district+', '+o.state;
+  document.getElementById('officer-badge').classList.add('show');
+  document.getElementById('logout-btn').classList.add('show');
+
+  document.querySelectorAll('.nav-tab.locked').forEach(t=>t.classList.remove('locked'));
+  goTab('dashboard');
+  showToast('Welcome, '+o.name+(o.isSupervisor?' [SUPERVISOR — Full National Access]':' ['+o.district+' | '+o.dept+']'),'ok');
+}
+
+function logout(){
+  currentOfficer = null;
+  document.getElementById('officer-badge').classList.remove('show');
+  document.getElementById('logout-btn').classList.remove('show');
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>{ if(i>0) t.classList.add('locked'); });
+  document.getElementById('login-select').value='';
+  document.getElementById('login-preview').style.display='none';
+  goTab('login');
+  showToast('Logged out successfully','info');
+}
+
+// ════════════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════════════
+function goTab(name){
+  if(name!=='login' && !currentOfficer){ showToast('Please login first','err'); return; }
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  if(name==='dashboard')    renderDashboard();
+  if(name==='citizens')     renderCitizens();
+  if(name==='apply')        setupApply();
+  if(name==='applications') renderApplications();
+  if(name==='analytics')    renderAnalytics();
+  if(name==='backend')      renderBackend();
+}
+
+// ════════════════════════════════════════════════════════
+//  JURISDICTION NOTICE helper
+// ════════════════════════════════════════════════════════
+function showJurisdictionBanner(elId, textId){
+  const el = document.getElementById(elId);
+  const tx = document.getElementById(textId);
+  if(!el||!tx) return;
+  if(!currentOfficer||currentOfficer.isSupervisor){
+    el.style.display='none'; return;
+  }
+  el.style.cssText='display:flex;align-items:center;gap:8px;background:#fffbf0;border:1px solid #f0cc60;border-left:4px solid var(--amber);border-radius:3px;padding:8px 12px;font-size:11px;color:#78350f;margin-bottom:12px;';
+  tx.textContent='Jurisdiction Filter Active — District: "'+currentOfficer.district+'" | Dept: "'+currentOfficer.dept+'" | State: "'+currentOfficer.state+'"';
+}
+
+// ════════════════════════════════════════════════════════
+//  DASHBOARD  — uses myApps() for access control
+// ════════════════════════════════════════════════════════
+function renderDashboard(){
+  showJurisdictionBanner('dash-jur','dash-jur-text');
+
+  const visApps  = myApps();
+  const pending  = visApps.filter(a=>a.status==='SUBMITTED'||a.status==='UNDER_REVIEW');
+  const approved = visApps.filter(a=>a.status==='APPROVED'||a.status==='DISBURSED');
+  const rejected = visApps.filter(a=>a.status==='REJECTED');
+  const totalDisb= approved.reduce((s,a)=>s+a.benefit,0);
+  const visCits  = currentOfficer.isSupervisor
+    ? CITIZENS
+    : CITIZENS.filter(c=>c.district===currentOfficer.district);
+
+  document.getElementById('dash-subtitle').textContent =
+    currentOfficer.isSupervisor
+      ? 'Central Supervisor · National View · All pending applications'
+      : 'Welcome, '+currentOfficer.name+' · '+currentOfficer.district+' | '+currentOfficer.dept+' · Pending applications';
+
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="stat c-amber"><div class="stat-icon">📂</div>
+      <div class="stat-label">Pending Review</div>
+      <div class="stat-num">${pending.length}</div>
+      <div class="stat-sub">Awaiting decision</div>
+    </div>
+    <div class="stat c-green"><div class="stat-icon">✅</div>
+      <div class="stat-label">Approved / Disbursed</div>
+      <div class="stat-num">${approved.length}</div>
+      <div class="stat-sub">₹${(totalDisb/100000).toFixed(1)}L disbursed</div>
+    </div>
+    <div class="stat c-red"><div class="stat-icon">❌</div>
+      <div class="stat-label">Rejected</div>
+      <div class="stat-num">${rejected.length}</div>
+      <div class="stat-sub">This cycle</div>
+    </div>
+    <div class="stat c-teal"><div class="stat-icon">👥</div>
+      <div class="stat-label">${currentOfficer.isSupervisor?'Total':'District'} Citizens</div>
+      <div class="stat-num">${visCits.length}</div>
+      <div class="stat-sub">${visCits.filter(c=>c.verified==='Y').length} verified</div>
+    </div>`;
+
+  applyDashFilter();
+}
+
+function getPendingApps(){
+  return myApps()
+    .filter(a=>a.status==='SUBMITTED'||a.status==='UNDER_REVIEW')
+    .sort((a,b)=>b.priority-a.priority);
+}
+
+function applyDashFilter(){
+  let data = getPendingApps();
+  const inc = document.getElementById('df-income').value;
+  const cat = document.getElementById('df-cat').value;
+  const st  = document.getElementById('df-state').value;
+  const sch = document.getElementById('df-scheme').value;
+
+  if(inc) data = data.filter(a=>incomeGroup(a.citizen.income)===inc);
+  if(cat) data = data.filter(a=>a.citizen.category===cat);
+  if(st)  data = data.filter(a=>a.citizen.state===st);
+  if(sch) data = data.filter(a=>a.schemeId===parseInt(sch));
+
+  pagState.dash.data = data;
+  pagState.dash.page = 1;
+  renderDashTable();
+  updateChips('dash',{inc,cat,st,sch});
+  document.getElementById('pending-count').textContent = '('+data.length+' applications)';
+}
+
+function clearDashFilter(){
+  ['df-income','df-cat','df-state','df-scheme'].forEach(id=>document.getElementById(id).value='');
+  applyDashFilter();
+}
+
+function renderDashTable(){
+  const {page,perPage,data} = pagState.dash;
+  const start = (page-1)*perPage;
+  const slice = data.slice(start, start+perPage);
+  const tbody = document.getElementById('dash-tbody');
+  tbody.innerHTML = '';
+
+  if(slice.length===0){
+    tbody.innerHTML='<tr><td colspan="11" style="text-align:center;padding:24px;color:var(--grey);">No pending applications in your jurisdiction match the current filters.</td></tr>';
+    document.getElementById('dash-pag').innerHTML='';
+    return;
+  }
+
+  slice.forEach((a,idx)=>{
+    const c=a.citizen; const s=a.scheme;
+    const sc=a.priority>=70?'score-high':a.priority>=45?'score-mid':'score-low';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="td-bold">${start+idx+1}</td>
+      <td class="td-bold">${c.name}</td>
+      <td class="td-mono">${c.aadhaar}</td>
+      <td><span class="badge b-${c.category.toLowerCase()}">${c.category}</span></td>
+      <td>₹${c.income.toLocaleString('en-IN')}</td>
+      <td><span class="badge ${c.location==='RURAL'?'b-rural':'b-urban'}">${c.location}</span></td>
+      <td>${c.state}</td>
+      <td style="font-weight:500;color:var(--teal-d);">${s.name}</td>
+      <td><span class="${sc}">${a.priority}</span></td>
+      <td style="${a.daysAgo>7?'color:var(--red);font-weight:600;':''}">${a.daysAgo}d</td>
+      <td>
+        <div class="flex gap-8">
+          <button class="btn btn-green btn-xs" onclick="approveApp(${a.id})">✓ Approve</button>
+          <button class="btn btn-red btn-xs" onclick="openReject(${a.id})">✗ Reject</button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  renderPagination('dash');
+}
+
+// ════════════════════════════════════════════════════════
+//  APPROVE / REJECT  — access-controlled
+// ════════════════════════════════════════════════════════
+function approveApp(appId){
+  const app = APPLICATIONS.find(a=>a.id===appId);
+  if(!app) return;
+  // Access check
+  if(!getVisibleApplications(currentOfficer).find(a=>a.id===appId)){
+    showToast('Access denied — application outside your jurisdiction','err'); return;
+  }
+  const elig = checkEligibility(app.citizen, app.scheme);
+  if(!elig.ok){ showToast('Cannot approve — '+elig.reason,'err'); return; }
+  const remaining = app.scheme.budget - (fundDisbursed[app.scheme.id]||0);
+  if(app.benefit > remaining){ showToast('Insufficient scheme funds — cannot approve','err'); return; }
+  app.status = 'DISBURSED';
+  app.txnRef = 'TXN'+Date.now()+String(appId).padStart(6,'0');
+  fundDisbursed[app.scheme.id] = (fundDisbursed[app.scheme.id]||0) + app.benefit;
+  showToast('Approved & Disbursed ₹'+app.benefit.toLocaleString('en-IN')+' to '+app.citizen.name,'ok');
+  renderDashboard();
+}
+
+function openReject(appId){
+  rejectTargetId = appId;
+  document.getElementById('rej-reason').value='';
+  document.getElementById('rej-notes').value='';
+  openModal('modal-reject');
+}
+
+function confirmReject(){
+  const reason = document.getElementById('rej-reason').value;
+  const notes  = document.getElementById('rej-notes').value;
+  if(!reason){ showToast('Please select a rejection reason','err'); return; }
+  const app = APPLICATIONS.find(a=>a.id===rejectTargetId);
+  if(!app) return;
+  app.status = 'REJECTED';
+  app.rejectionReason = reason+(notes?' — '+notes:'');
+  closeModal('modal-reject');
+  showToast('Application rejected: '+app.citizen.name,'warn');
+  renderDashboard();
+}
+
+function appAction(appId, action){
+  if(action==='approve') approveApp(appId);
+  else openReject(appId);
+}
+
+// ════════════════════════════════════════════════════════
+//  CITIZENS  — jurisdiction-scoped
+// ════════════════════════════════════════════════════════
+function myCitizens(){
+  if(!currentOfficer) return [];
+  if(currentOfficer.isSupervisor) return CITIZENS;
+  return CITIZENS.filter(c=>c.district===currentOfficer.district);
+}
+
+function applyCitFilter(){
+  let data = myCitizens();
+  const inc  = document.getElementById('cf-income').value;
+  const cat  = document.getElementById('cf-cat').value;
+  const st   = document.getElementById('cf-state').value;
+  const loc  = document.getElementById('cf-loc').value;
+  const srch = document.getElementById('cf-search').value.toLowerCase().trim();
+
+  if(inc) data = data.filter(c=>incomeGroup(c.income)===inc);
+  if(cat) data = data.filter(c=>c.category===cat);
+  if(st)  data = data.filter(c=>c.state===st);
+  if(loc) data = data.filter(c=>c.location===loc);
+  if(srch)data = data.filter(c=>c.name.toLowerCase().includes(srch)||c.aadhaar.includes(srch));
+
+  pagState.cit.data = data;
+  pagState.cit.page = 1;
+  renderCitTable();
+  updateChips('cit',{inc,cat,st,loc,srch});
+  document.getElementById('cit-count').textContent='('+data.length+' citizens)';
+}
+
+function clearCitFilter(){
+  ['cf-income','cf-cat','cf-state','cf-loc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cf-search').value='';
+  applyCitFilter();
+}
+
+function renderCitizens(){
+  showJurisdictionBanner('cit-jur','cit-jur-text');
+  const data = myCitizens();
+  pagState.cit.data = data;
+  pagState.cit.page = 1;
+  renderCitTable();
+  document.getElementById('cit-count').textContent='('+data.length+' citizens)';
+}
+
+function renderCitTable(){
+  const {page,perPage,data} = pagState.cit;
+  const start = (page-1)*perPage;
+  const slice = data.slice(start,start+perPage);
+  const tbody = document.getElementById('cit-tbody');
+  tbody.innerHTML='';
+  slice.forEach(c=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="td-mono">${c.id}</td>
+      <td class="td-bold">${c.name}</td>
+      <td class="td-mono">${c.aadhaar}</td>
+      <td>${c.age}</td>
+      <td>${c.gender==='M'?'Male':'Female'}</td>
+      <td><span class="badge b-${c.category.toLowerCase()}">${c.category}</span></td>
+      <td>₹${c.income.toLocaleString('en-IN')}</td>
+      <td>${c.occupation}</td>
+      <td><span class="badge ${c.location==='RURAL'?'b-rural':'b-urban'}">${c.location}</span></td>
+      <td>${c.district}</td>
+      <td>${c.state}</td>
+      <td style="${c.verified==='Y'?'color:var(--green);font-weight:600;':'color:var(--red);'}">${c.verified==='Y'?'✓ Yes':'✗ No'}</td>`;
+    tbody.appendChild(tr);
+  });
+  renderPagination('cit');
+}
+
+function openAddCitizen(){ openModal('modal-add-citizen'); }
+
+function saveCitizen(){
+  const name    = document.getElementById('nc-name').value.trim();
+  const aadhaar = document.getElementById('nc-aadhaar').value.trim();
+  const age     = parseInt(document.getElementById('nc-age').value);
+  const gender  = document.getElementById('nc-gender').value;
+  const cat     = document.getElementById('nc-cat').value;
+  const income  = parseInt(document.getElementById('nc-income').value);
+  const occ     = document.getElementById('nc-occ').value;
+  const land    = parseFloat(document.getElementById('nc-land').value)||0;
+  const loc     = document.getElementById('nc-loc').value;
+  // District/state locked to officer's jurisdiction
+  const state   = currentOfficer.isSupervisor
+    ? (document.getElementById('nc-state').value||'Central')
+    : currentOfficer.state;
+  const dist    = currentOfficer.isSupervisor
+    ? (document.getElementById('nc-district').value.trim()||'Central')
+    : currentOfficer.district;
+  const village = document.getElementById('nc-village').value.trim();
+  const bank    = document.getElementById('nc-bank').value.trim();
+  const ifsc    = document.getElementById('nc-ifsc').value.trim()||'SBIN0001234';
+
+  if(!name||!aadhaar||!age||!gender||!cat||!income||!loc||!bank){
+    showToast('Please fill all required fields','err'); return;
+  }
+  if(aadhaar.length!==12||!/^\d+$/.test(aadhaar)){
+    showToast('Aadhaar must be exactly 12 digits','err'); return;
+  }
+  if(CITIZENS.find(c=>c.aadhaar===aadhaar)){
+    showToast('Aadhaar already registered','err'); return;
+  }
+
+  const newC = {
+    id:cidSeq++, aadhaar, name, age, gender, category:cat, income,
+    occupation:occ, land, location:loc,
+    village:village||dist, district:dist, state,
+    bank:'ACCT'+String(cidSeq).padStart(12,'0'), ifsc,
+    verified:'N', regDate:new Date().toLocaleDateString('en-IN')
+  };
+  CITIZENS.push(newC);
+
+  // add to apply dropdown only if within jurisdiction
+  if(currentOfficer.isSupervisor || newC.district===currentOfficer.district){
+    const apCit = document.getElementById('ap-citizen');
+    const o=document.createElement('option'); o.value=newC.id;
+    o.textContent=newC.name+' ('+newC.aadhaar+') — '+newC.district+', '+newC.state;
+    apCit.appendChild(o);
+  }
+
+  closeModal('modal-add-citizen');
+  showToast('Citizen registered: '+name+' (ID: '+newC.id+')','ok');
+  ['nc-name','nc-aadhaar','nc-age','nc-income','nc-land','nc-district','nc-village','nc-bank','nc-ifsc'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  ['nc-gender','nc-cat','nc-loc','nc-state'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  renderCitizens();
+}
+
+// ════════════════════════════════════════════════════════
+//  APPLY FOR SCHEME  — jurisdiction-gated
+// ════════════════════════════════════════════════════════
+function setupApply(){
+  // Show notice
+  const notice = document.getElementById('apply-jur-notice');
+  if(notice){
+    if(currentOfficer.isSupervisor){
+      notice.style.display='none';
+    } else {
+      notice.style.cssText='display:flex;align-items:center;gap:8px;background:#fffbf0;border:1px solid #f0cc60;border-left:4px solid var(--amber);border-radius:3px;padding:8px 12px;font-size:11px;color:#78350f;margin-bottom:12px;';
+      notice.innerHTML='<span>🏛️</span><span>You can submit applications for citizens in <b>'+currentOfficer.district+'</b> for schemes under <b>'+currentOfficer.dept+'</b> department only.</span>';
+    }
+  }
+
+  // Rebuild citizen dropdown — scoped to officer's district
+  const apCit = document.getElementById('ap-citizen');
+  apCit.innerHTML='<option value="">-- Select citizen --</option>';
+  myCitizens().forEach(c=>{
+    const o=document.createElement('option'); o.value=c.id;
+    o.textContent=c.name+' ('+c.aadhaar+') — '+c.district;
+    apCit.appendChild(o);
+  });
+
+  // Rebuild scheme dropdown — scoped to officer's dept
+  const mySchemes = currentOfficer.isSupervisor
+    ? SCHEMES
+    : SCHEMES.filter(s=>s.dept===currentOfficer.dept);
+  const apSch = document.getElementById('ap-scheme');
+  apSch.innerHTML='<option value="">-- Select scheme --</option>';
+  mySchemes.forEach(s=>{
+    const o=document.createElement('option'); o.value=s.id;
+    o.textContent=s.name+' ('+s.code+')';
+    apSch.appendChild(o);
+  });
+
+  // Scheme reference list
+  const ref = document.getElementById('scheme-ref-list');
+  if(ref){
+    ref.innerHTML='';
+    mySchemes.forEach(s=>{
+      const div=document.createElement('div');
+      div.style.cssText='background:var(--teal-l);border-radius:5px;padding:8px 11px;margin-bottom:7px;border-left:3px solid var(--teal);';
+      div.innerHTML=`<div style="font-weight:600;font-size:12px;color:var(--teal-d);">${s.name}</div>
+      <div style="font-size:11px;color:var(--text-m);margin-top:2px;">
+        ${s.maxIncome?'Income &lt; ₹'+s.maxIncome.toLocaleString('en-IN'):'No income limit'}
+        ${s.location!=='ALL'?' · '+s.location+' only':''}
+        ${s.gender!=='ALL'?' · '+(s.gender==='F'?'Women only':'Men only'):''}
+        ${s.category!=='ALL'?' · '+s.category:''}
+        ${s.minLand>0?' · Land ≥ '+s.minLand+' ac':''}
+      </div>`;
+      ref.appendChild(div);
+    });
+  }
+
+  // Reset selections
+  document.getElementById('ap-citizen-preview').style.display='none';
+  document.getElementById('ap-elig-result').style.display='none';
+}
+
+function citizenSelected(){
+  const cid = parseInt(document.getElementById('ap-citizen').value);
+  const c   = CITIZENS.find(x=>x.id===cid);
+  const pv  = document.getElementById('ap-citizen-preview');
+  if(!c){ pv.style.display='none'; return; }
+  pv.style.display='block';
+  pv.innerHTML=`
+    <div style="font-weight:600;color:var(--teal-d);font-size:13px;">${c.name}</div>
+    <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:8px;font-size:11.5px;color:var(--text-m);">
+      <span>Age: ${c.age}</span>
+      <span>·</span><span>Category: <b>${c.category}</b></span>
+      <span>·</span><span>Gender: <b>${c.gender==='M'?'Male':'Female'}</b></span>
+      <span>·</span><span>Income: <b>₹${c.income.toLocaleString('en-IN')}</b></span>
+      <span>·</span><span>${c.location}</span>
+      <span>·</span><span>${c.district}, ${c.state}</span>
+      <span>·</span><span>Priority Score: <b>${calcPriority(c)}/100</b></span>
+    </div>`;
+  checkEligibilityPreview();
+}
+
+function checkEligibilityPreview(){
+  const cid = parseInt(document.getElementById('ap-citizen').value);
+  const sid = parseInt(document.getElementById('ap-scheme').value);
+  const el  = document.getElementById('ap-elig-result');
+  if(!cid||!sid){ el.style.display='none'; return; }
+  const c = CITIZENS.find(x=>x.id===cid);
+  const s = SCHEMES.find(x=>x.id===sid);
+  if(!c||!s){ el.style.display='none'; return; }
+  const elig    = checkEligibility(c,s);
+  const benefit = calcBenefit(c,s);
+  el.style.display='block';
+  if(elig.ok){
+    el.className='alert a-ok';
+    el.innerHTML=`<span class="alert-icon">✅</span><span><b>Eligible</b> — Estimated benefit: ₹${benefit.toLocaleString('en-IN')} · Priority Score: ${calcPriority(c)}/100</span>`;
+  } else {
+    el.className='alert a-err';
+    el.innerHTML=`<span class="alert-icon">❌</span><span><b>Not Eligible</b> — ${elig.reason}</span>`;
+  }
+}
+
+function submitApplication(){
+  const cid     = parseInt(document.getElementById('ap-citizen').value);
+  const sid     = parseInt(document.getElementById('ap-scheme').value);
+  const remarks = document.getElementById('ap-remarks').value.trim();
+  if(!cid){ showToast('Select a citizen','err'); return; }
+  if(!sid){ showToast('Select a scheme','err'); return; }
+
+  const c = CITIZENS.find(x=>x.id===cid);
+  const s = SCHEMES.find(x=>x.id===sid);
+
+  // Jurisdiction checks
+  if(!currentOfficer.isSupervisor && c.district!==currentOfficer.district){
+    showToast('Citizen not in your district jurisdiction','err'); return;
+  }
+  if(!currentOfficer.isSupervisor && s.dept!==currentOfficer.dept){
+    showToast('Scheme not under your department','err'); return;
+  }
+
+  // Duplicate check — mirrors trg_no_duplicate_app trigger
+  if(APPLICATIONS.find(a=>a.citizenId===cid&&a.schemeId===sid&&a.status!=='REJECTED')){
+    showToast('Active application already exists for this citizen + scheme','err'); return;
+  }
+
+  const elig = checkEligibility(c,s);
+  const newApp = {
+    id:appSeq++,
+    citizenId:cid, citizen:c,
+    schemeId:sid, scheme:s,
+    officerId:currentOfficer.id, officer:currentOfficer,
+    applyDate:new Date().toLocaleDateString('en-IN'),
+    status:'SUBMITTED',
+    priority:calcPriority(c),
+    benefit:calcBenefit(c,s),
+    rejectionReason:elig.ok?'':elig.reason,
+    txnRef:null,
+    daysAgo:0
+  };
+  APPLICATIONS.push(newApp);
+  showToast('Application submitted for '+c.name+' — Priority: '+newApp.priority,'ok');
+  resetApply();
+}
+
+function resetApply(){
+  document.getElementById('ap-citizen').value='';
+  document.getElementById('ap-scheme').value='';
+  document.getElementById('ap-remarks').value='';
+  document.getElementById('ap-citizen-preview').style.display='none';
+  document.getElementById('ap-elig-result').style.display='none';
+}
+
+// ════════════════════════════════════════════════════════
+//  APPLICATIONS TAB  — jurisdiction-scoped
+// ════════════════════════════════════════════════════════
+function applyAppFilter(){
+  let data = myApps();
+  const status = document.getElementById('af-status').value;
+  const sch    = document.getElementById('af-scheme').value;
+  const cat    = document.getElementById('af-cat').value;
+  const st     = document.getElementById('af-state').value;
+
+  if(status) data = data.filter(a=>a.status===status);
+  if(sch)    data = data.filter(a=>a.schemeId===parseInt(sch));
+  if(cat)    data = data.filter(a=>a.citizen.category===cat);
+  if(st)     data = data.filter(a=>a.citizen.state===st);
+
+  data.sort((a,b)=>b.priority-a.priority);
+  pagState.app.data=data;
+  pagState.app.page=1;
+  renderAppTable();
+  updateChips('app',{status,sch,cat,st});
+  document.getElementById('app-count').textContent='('+data.length+' applications)';
+}
+
+function clearAppFilter(){
+  ['af-status','af-scheme','af-cat','af-state'].forEach(id=>document.getElementById(id).value='');
+  applyAppFilter();
+}
+
+function renderApplications(){
+  showJurisdictionBanner('app-jur','app-jur-text');
+  const data = myApps().sort((a,b)=>b.priority-a.priority);
+  pagState.app.data = data;
+  pagState.app.page = 1;
+  renderAppTable();
+  document.getElementById('app-count').textContent='('+data.length+' applications)';
+}
+
+function renderAppTable(){
+  const {page,perPage,data} = pagState.app;
+  const start=(page-1)*perPage;
+  const slice=data.slice(start,start+perPage);
+  const tbody=document.getElementById('app-tbody');
+  tbody.innerHTML='';
+  slice.forEach((a,idx)=>{
+    const c=a.citizen; const s=a.scheme;
+    const sc=a.priority>=70?'score-high':a.priority>=45?'score-mid':'score-low';
+    const statusPill=statusPillHtml(a.status);
+    const isPending = a.status==='SUBMITTED'||a.status==='UNDER_REVIEW';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="td-mono">APP-${String(a.id).padStart(4,'0')}</td>
+      <td class="td-bold">${c.name}</td>
+      <td class="td-mono">${c.aadhaar}</td>
+      <td><span class="badge b-${c.category.toLowerCase()}">${c.category}</span></td>
+      <td>₹${c.income.toLocaleString('en-IN')}</td>
+      <td style="font-weight:500;">${s.name}</td>
+      <td><span class="${sc}">${a.priority}</span></td>
+      <td>${a.applyDate}</td>
+      <td>${statusPill}</td>
+      <td>${isPending?`
+        <div class="flex gap-8">
+          <button class="btn btn-green btn-xs" onclick="appAction(${a.id},'approve')">✓</button>
+          <button class="btn btn-red btn-xs" onclick="appAction(${a.id},'reject')">✗</button>
+        </div>`:
+        (a.status==='DISBURSED'?`<span style="font-size:10.5px;color:var(--text-s);" class="td-mono">${a.txnRef||'—'}</span>`:
+        (a.status==='REJECTED'?`<span style="font-size:10.5px;color:var(--red);">${a.rejectionReason||'—'}</span>`:'—'))
+      }</td>`;
+    tbody.appendChild(tr);
+  });
+  renderPagination('app');
+}
+
+// ════════════════════════════════════════════════════════
+//  ANALYTICS  — supervisor sees national, officer sees jurisdiction
+// ════════════════════════════════════════════════════════
+function renderAnalytics(){
+  const body = document.getElementById('analytics-body');
+  body.innerHTML='';
+
+  const isNational = currentOfficer.isSupervisor;
+  const apps       = isNational ? APPLICATIONS : myApps();
+  const allCits    = isNational ? CITIZENS : myCitizens();
+
+  showJurisdictionBanner('an-jur','an-jur-text');
+
+  if(!isNational){
+    const notice = document.getElementById('an-jur');
+    if(notice) notice.style.display='flex';
+  }
+
+  const total        = apps.length;
+  const approved     = apps.filter(a=>a.status==='APPROVED'||a.status==='DISBURSED');
+  const rejected     = apps.filter(a=>a.status==='REJECTED');
+  const pending      = apps.filter(a=>a.status==='SUBMITTED'||a.status==='UNDER_REVIEW');
+  const totalDisbAmt = approved.reduce((s,a)=>s+a.benefit,0);
+  const approvalRate = total?Math.round(approved.length*100/total):0;
+
+  body.innerHTML+=`
+  <div class="g4 mb12">
+    <div class="stat c-teal"><div class="stat-icon">📂</div>
+      <div class="stat-label">Total Applications</div><div class="stat-num">${total}</div></div>
+    <div class="stat c-green"><div class="stat-icon">✅</div>
+      <div class="stat-label">Approval Rate</div><div class="stat-num">${approvalRate}%</div>
+      <div class="stat-sub">${approved.length} approved / disbursed</div></div>
+    <div class="stat c-amber"><div class="stat-icon">⏳</div>
+      <div class="stat-label">Pending</div><div class="stat-num">${pending.length}</div></div>
+    <div class="stat c-olive"><div class="stat-icon">💰</div>
+      <div class="stat-label">Total Disbursed</div>
+      <div class="stat-num">₹${(totalDisbAmt/100000).toFixed(1)}L</div></div>
+  </div>`;
+
+  // ── A1: Gender-wise (SQL: GROUP BY gender)
+  body.innerHTML+=`<div class="an-section"><h3>♀♂ Gender-wise Beneficiary Distribution <small style="font-weight:400;color:var(--grey);font-size:11px;">— SQL: SELECT gender, COUNT(*), SUM(benefit) ... GROUP BY gender</small></h3>`;
+  const gDiv=document.createElement('div'); gDiv.className='g2';
+  ['M','F'].forEach(g=>{
+    const label=g==='M'?'Male':'Female';
+    const icon =g==='M'?'♂':'♀';
+    const col  =g==='M'?'var(--teal)':'#9d174d';
+    const gCits=allCits.filter(c=>c.gender===g).length;
+    const gApps=apps.filter(a=>a.citizen.gender===g);
+    const gAppr=gApps.filter(a=>a.status==='APPROVED'||a.status==='DISBURSED');
+    const gAmt =gAppr.reduce((s,a)=>s+a.benefit,0);
+    const rate =gApps.length?Math.round(gAppr.length*100/gApps.length):0;
+    gDiv.innerHTML+=`
+      <div class="card"><div class="card-body" style="display:flex;align-items:center;gap:16px;">
+        <div style="font-size:38px;color:${col};opacity:0.7;">${icon}</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:${col};">${label}</div>
+          <div style="font-size:11px;color:var(--grey);margin-bottom:6px;">${gCits} registered citizens</div>
+          <div class="g3" style="gap:8px;">
+            <div style="background:var(--grey-l);border-radius:3px;padding:6px;text-align:center;">
+              <div style="font-size:16px;font-weight:700;color:${col};">${gApps.length}</div>
+              <div style="font-size:9.5px;color:var(--grey);">Applications</div>
+            </div>
+            <div style="background:var(--grey-l);border-radius:3px;padding:6px;text-align:center;">
+              <div style="font-size:16px;font-weight:700;color:var(--green);">${gAppr.length}</div>
+              <div style="font-size:9.5px;color:var(--grey);">Approved</div>
+            </div>
+            <div style="background:var(--grey-l);border-radius:3px;padding:6px;text-align:center;">
+              <div style="font-size:16px;font-weight:700;color:${col};">${rate}%</div>
+              <div style="font-size:9.5px;color:var(--grey);">Approval Rate</div>
+            </div>
+          </div>
+          <div style="margin-top:6px;font-size:11px;color:${col};font-weight:600;">₹${(gAmt/100000).toFixed(1)}L disbursed</div>
+        </div>
+      </div></div>`;
+  });
+  body.appendChild(gDiv);
+  body.innerHTML+='</div>';
+
+  // ── A2: Scheme Fund Utilisation (SQL Q9, Q10)
+  body.innerHTML+=`<div class="an-section mt16"><h3>📊 Scheme-wise Fund Utilisation <small style="font-weight:400;color:var(--grey);font-size:11px;">— SQL Q9/Q10: JOIN Scheme_Fund_Pool, utilization %</small></h3>`;
+  const schDiv=document.createElement('div'); schDiv.className='card';
+  schDiv.innerHTML='<div class="card-body">';
+  SCHEMES.forEach(s=>{
+    const spent = fundDisbursed[s.id]||0;
+    const pct   = Math.min(100,Math.round(spent/s.budget*100));
+    const cls   = pct>=75?'ff-high':pct>=40?'ff-mid':'ff-good';
+    const sApps = apps.filter(a=>a.schemeId===s.id);
+    const disbC = sApps.filter(a=>a.status==='DISBURSED'||a.status==='APPROVED').length;
+    schDiv.innerHTML+=`
+      <div class="fund-bar-wrap">
+        <div class="fund-bar-label">
+          <span class="fund-bar-name">${s.name} <span style="font-size:10px;color:var(--grey);margin-left:4px;">${s.code} · ${s.type}</span></span>
+          <span class="fund-bar-pct">${pct}% used · ₹${(spent/100000).toFixed(1)}L / ₹${(s.budget/10000000).toFixed(0)}Cr · ${disbC}/${sApps.length} beneficiaries</span>
+        </div>
+        <div class="fund-bar-track"><div class="fund-fill ${cls}" style="width:${pct}%"></div></div>
+      </div>`;
+  });
+  schDiv.innerHTML+='</div>';
+  body.appendChild(schDiv);
+  body.innerHTML+='</div>';
+
+  // ── A3: Category Distribution (SQL Q13)
+  body.innerHTML+=`<div class="an-section mt16"><h3>👥 Category-wise Beneficiary Analysis <small style="font-weight:400;color:var(--grey);font-size:11px;">— SQL Q13: GROUP BY category with coverage %</small></h3>`;
+  const catDiv=document.createElement('div'); catDiv.className='g4';
+  ['SC','ST','OBC','GEN'].forEach(cat=>{
+    const citCount=allCits.filter(c=>c.category===cat).length;
+    const cApps=apps.filter(a=>a.citizen.category===cat);
+    const cAppr=cApps.filter(a=>a.status==='APPROVED'||a.status==='DISBURSED');
+    const disb=cAppr.reduce((s,a)=>s+a.benefit,0);
+    const appRate=citCount?Math.round(cAppr.length*100/citCount):0;
+    const clr=cat==='SC'?'#9d174d':cat==='ST'?'#5b21b6':cat==='OBC'?'#075985':'#374151';
+    catDiv.innerHTML+=`
+      <div class="card"><div class="card-body" style="text-align:center;">
+        <div style="width:50px;height:50px;border-radius:50%;background:${clr}18;border:2px solid ${clr}44;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:18px;font-weight:700;color:${clr};">${cat}</div>
+        <div style="font-size:22px;font-weight:700;color:${clr};">${citCount}</div>
+        <div style="font-size:10.5px;color:var(--grey);margin-bottom:8px;">Citizens</div>
+        <div style="font-size:12px;"><b>${cApps.length}</b> applications</div>
+        <div style="font-size:12px;color:var(--green);"><b>${cAppr.length}</b> approved</div>
+        <div style="font-size:12px;color:var(--text-s);">₹${(disb/100000).toFixed(1)}L disbursed</div>
+        <div style="margin-top:8px;font-size:11px;background:var(--grey-l);border-radius:10px;padding:2px 8px;display:inline-block;color:var(--grey);">Coverage: ${appRate}%</div>
+      </div></div>`;
+  });
+  body.appendChild(catDiv);
+
+  // ── A4: Age Group Analysis
+  body.innerHTML+=`<div class="an-section mt16"><h3>👴 Age Group Analysis <small style="font-weight:400;color:var(--grey);font-size:11px;">— SQL: CASE WHEN age GROUP BY age_band, senior bonus validation</small></h3>`;
+  const ageBands=[
+    {label:'Youth (18–35)',     fn:c=>c.age>=18&&c.age<=35},
+    {label:'Working (36–55)',   fn:c=>c.age>=36&&c.age<=55},
+    {label:'Pre-Senior (56–60)',fn:c=>c.age>=56&&c.age<=60},
+    {label:'Senior (60+)',      fn:c=>c.age>60},
+  ];
+  const ageDiv=document.createElement('div'); ageDiv.className='card';
+  let ageHTML=`<div class="tbl-wrap"><table><thead><tr>
+    <th>Age Group</th><th>Applications</th><th>Approved</th>
+    <th>Avg Priority Score</th><th>Total Benefit</th><th>Senior Bonus</th>
+  </tr></thead><tbody>`;
+  ageBands.forEach(b=>{
+    const bA=apps.filter(a=>b.fn(a.citizen));
+    const bP=bA.filter(a=>a.status==='APPROVED'||a.status==='DISBURSED');
+    const bAmt=bP.reduce((s,a)=>s+a.benefit,0);
+    const avgSc=bA.length?Math.round(bA.reduce((s,a)=>s+a.priority,0)/bA.length):0;
+    const hasSenior=b.fn({age:65});
+    ageHTML+=`<tr>
+      <td class="td-bold">${b.label}</td>
+      <td>${bA.length}</td>
+      <td style="color:var(--green);font-weight:600;">${bP.length}</td>
+      <td><span class="${avgSc>=70?'score-high':avgSc>=45?'score-mid':'score-low'}">${avgSc}</span></td>
+      <td>₹${(bAmt/100000).toFixed(1)}L</td>
+      <td style="font-size:10.5px;color:var(--text-s);">${hasSenior?'✅ +10 pts priority, +12% benefit':'—'}</td></tr>`;
+  });
+  ageHTML+='</tbody></table></div>';
+  ageDiv.innerHTML=ageHTML;
+  body.appendChild(ageDiv);
+
+  // ── A5: State-wise (SQL Q12)
+  if(isNational){
+    body.innerHTML+=`<div class="an-section mt16"><h3>🗺️ State-wise Disbursement Analysis <small style="font-weight:400;color:var(--grey);font-size:11px;">— SQL Q12: GROUP BY state, fund totals ranked</small></h3>`;
+    const stateData={};
+    APPLICATIONS.forEach(a=>{
+      const st=a.citizen.state;
+      if(!stateData[st]) stateData[st]={apps:0,approved:0,amount:0};
+      stateData[st].apps++;
+      if(a.status==='APPROVED'||a.status==='DISBURSED'){
+        stateData[st].approved++;
+        stateData[st].amount+=a.benefit;
+      }
+    });
+    const stTable=document.createElement('div'); stTable.className='card';
+    const stSorted=Object.entries(stateData).sort((a,b)=>b[1].amount-a[1].amount);
+    const maxAmt=stSorted[0]?stSorted[0][1].amount:1;
+    let stHTML=`<div class="tbl-wrap"><table><thead><tr>
+      <th>Rank</th><th>State</th><th>Applications</th><th>Approved</th><th>Approval %</th><th>Total Disbursed</th><th>Distribution</th>
+    </tr></thead><tbody>`;
+    stSorted.forEach(([st,d],i)=>{
+      const w=Math.round(d.amount/maxAmt*100);
+      const rate=d.apps?Math.round(d.approved*100/d.apps):0;
+      stHTML+=`<tr>
+        <td><b>#${i+1}</b></td>
+        <td class="td-bold">${st}</td>
+        <td>${d.apps}</td>
+        <td style="color:var(--green);font-weight:600;">${d.approved}</td>
+        <td style="font-weight:600;color:${rate>60?'var(--green)':rate>30?'var(--amber)':'var(--red)'};">${rate}%</td>
+        <td style="font-weight:600;">₹${(d.amount/100000).toFixed(1)}L</td>
+        <td style="min-width:120px;">
+          <div class="fund-bar-track"><div class="fund-fill ff-good" style="width:${w}%"></div></div>
+        </td></tr>`;
+    });
+    stHTML+='</tbody></table></div>';
+    stTable.innerHTML=stHTML;
+    body.appendChild(stTable);
+    body.innerHTML+='</div>';
+  }
+
+  // ── A6: Rural vs Urban (SQL Q11)
+  body.innerHTML+=`<div class="an-section mt16"><h3>🏘️ Rural vs Urban Split <small style="font-weight:400;color:var(--grey);font-size:11px;">— SQL Q11: GROUP BY location_type per scheme</small></h3>`;
+  const ruDiv=document.createElement('div'); ruDiv.className='g2';
+  ['RURAL','URBAN'].forEach(loc=>{
+    const lCits=allCits.filter(c=>c.location===loc).length;
+    const lApps=apps.filter(a=>a.citizen.location===loc);
+    const lAppr=lApps.filter(a=>a.status==='APPROVED'||a.status==='DISBURSED');
+    const lAmt =lAppr.reduce((s,a)=>s+a.benefit,0);
+    const rate =lApps.length?Math.round(lAppr.length*100/lApps.length):0;
+    const col  =loc==='RURAL'?'var(--olive)':'var(--teal)';
+    ruDiv.innerHTML+=`
+      <div class="card"><div class="card-body">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+          <div style="font-size:26px;">${loc==='RURAL'?'🌾':'🏙️'}</div>
+          <div><div style="font-size:16px;font-weight:700;color:${col};">${loc}</div>
+          <div style="font-size:10.5px;color:var(--grey);">${lCits} citizens registered</div></div>
+        </div>
+        <div class="g4" style="gap:8px;">
+          <div style="background:var(--grey-l);border-radius:3px;padding:8px;text-align:center;">
+            <div style="font-size:18px;font-weight:700;color:${col};">${lApps.length}</div>
+            <div style="font-size:9.5px;color:var(--grey);">Applications</div>
+          </div>
+          <div style="background:var(--grey-l);border-radius:3px;padding:6px;text-align:center;">
+            <div style="font-size:18px;font-weight:700;color:var(--green);">${lAppr.length}</div>
+            <div style="font-size:9.5px;color:var(--grey);">Approved</div>
+          </div>
+          <div style="background:var(--grey-l);border-radius:3px;padding:6px;text-align:center;">
+            <div style="font-size:16px;font-weight:700;color:${col};">${rate}%</div>
+            <div style="font-size:9.5px;color:var(--grey);">Approval %</div>
+          </div>
+          <div style="background:var(--grey-l);border-radius:3px;padding:6px;text-align:center;">
+            <div style="font-size:14px;font-weight:700;color:var(--teal);">₹${(lAmt/100000).toFixed(1)}L</div>
+            <div style="font-size:9.5px;color:var(--grey);">Disbursed</div>
+          </div>
+        </div>
+      </div></div>`;
+  });
+  body.appendChild(ruDiv);
+
+  // ── A7: Fraud Detection (SQL Q15)
+  body.innerHTML+=`<div class="an-section mt16"><h3>🚨 Fraud Detection Analysis <small style="font-weight:400;color:var(--grey);font-size:11px;">— SQL Q15: income &gt; 5L in BPL schemes + duplicate approvals</small></h3>`;
+  const BPL_SCHEMES=[1,2,5];
+  const fraudHard=apps.filter(a=>a.citizen.income>500000&&BPL_SCHEMES.includes(a.schemeId));
+  const fraudSoft=apps.filter(a=>{
+    if(a.citizen.income<=300000||a.citizen.income>500000) return false;
+    return apps.filter(b=>b.citizenId===a.citizenId&&(b.status==='APPROVED'||b.status==='DISBURSED')).length>1;
+  });
+  const fraudDiv=document.createElement('div'); fraudDiv.className='g2';
+  fraudDiv.innerHTML=`
+    <div class="card">
+      <div class="card-head"><h3 style="color:var(--red);">🔴 Hard Fraud — Income &gt;₹5L in BPL Schemes (${fraudHard.length})</h3></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Citizen</th><th>Income</th><th>Category</th><th>Scheme</th><th>Status</th><th>Flag</th></tr></thead>
+        <tbody>${fraudHard.length?fraudHard.map(a=>`
+          <tr style="background:#fde8e8;">
+            <td class="td-bold">${a.citizen.name}</td>
+            <td style="color:var(--red);font-weight:600;">₹${a.citizen.income.toLocaleString('en-IN')}</td>
+            <td>${a.citizen.category}</td>
+            <td>${a.scheme.name}</td>
+            <td>${statusPillHtml(a.status)}</td>
+            <td><span style="background:var(--red-l);color:var(--red);border:1px solid #f5a0a0;font-size:10px;padding:2px 7px;border-radius:3px;font-weight:600;">HARD FRAUD</span></td>
+          </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--grey);">No hard fraud detected ✓</td></tr>'}
+        </tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3 style="color:var(--amber);">🟡 Suspicious — ₹3L–5L + Multiple Approvals (${fraudSoft.length})</h3></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Citizen</th><th>Income</th><th>State</th><th>Scheme</th><th>Status</th><th>Flag</th></tr></thead>
+        <tbody>${fraudSoft.length?fraudSoft.slice(0,8).map(a=>`
+          <tr style="background:#fff9f0;">
+            <td class="td-bold">${a.citizen.name}</td>
+            <td style="color:var(--amber);font-weight:600;">₹${a.citizen.income.toLocaleString('en-IN')}</td>
+            <td>${a.citizen.state}</td>
+            <td>${a.scheme.name}</td>
+            <td>${statusPillHtml(a.status)}</td>
+            <td><span style="background:var(--amber-l);color:#92400e;border:1px solid var(--amber-ll);font-size:10px;padding:2px 7px;border-radius:3px;font-weight:600;">REVIEW</span></td>
+          </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--grey);">No suspicious cases ✓</td></tr>'}
+        </tbody>
+      </table></div>
+    </div>`;
+  body.appendChild(fraudDiv);
+
+  // ── A8: Top Priority Queue (SQL Q7)
+  body.innerHTML+=`<div class="an-section mt16"><h3>⭐ Top Priority Pending Applicants <small style="font-weight:400;color:var(--grey);font-size:11px;">— SQL Q7: ORDER BY priority_score DESC, get_priority_score() function</small></h3>`;
+  const topPending=apps.filter(a=>a.status==='SUBMITTED'||a.status==='UNDER_REVIEW')
+    .sort((a,b)=>b.priority-a.priority).slice(0,10);
+  const topDiv=document.createElement('div'); topDiv.className='card';
+  let topHTML=`<div class="tbl-wrap"><table><thead><tr>
+    <th>Rank</th><th>Citizen</th><th>Category</th><th>Age</th><th>Income</th>
+    <th>Location</th><th>State</th><th>Scheme</th><th>Priority Score</th><th>Days Waiting</th>
+  </tr></thead><tbody>`;
+  topPending.forEach((a,i)=>{
+    topHTML+=`<tr>
+      <td><b>#${i+1}</b></td>
+      <td class="td-bold">${a.citizen.name}</td>
+      <td><span class="badge b-${a.citizen.category.toLowerCase()}">${a.citizen.category}</span></td>
+      <td>${a.citizen.age}</td>
+      <td>₹${a.citizen.income.toLocaleString('en-IN')}</td>
+      <td><span class="badge ${a.citizen.location==='RURAL'?'b-rural':'b-urban'}">${a.citizen.location}</span></td>
+      <td>${a.citizen.state}</td>
+      <td>${a.scheme.name}</td>
+      <td><span class="score-high">${a.priority} / 100</span></td>
+      <td style="${a.daysAgo>7?'color:var(--red);font-weight:600;':''}">${a.daysAgo}d</td></tr>`;
+  });
+  topHTML+='</tbody></table></div>';
+  topDiv.innerHTML=topHTML;
+  body.appendChild(topDiv);
+
+  // ── A9: Income Band (SQL Q7 extended)
+  body.innerHTML+=`<div class="an-section mt16"><h3>💹 Income Band Analysis <small style="font-weight:400;color:var(--grey);font-size:11px;">— SQL: CASE income bands GROUP BY, coverage ratio</small></h3>`;
+  const bands=[
+    {label:'Below ₹1L (BPL)',fn:c=>c.income<=100000},
+    {label:'₹1L – ₹2.5L',   fn:c=>c.income>100000&&c.income<=250000},
+    {label:'₹2.5L – ₹5L',   fn:c=>c.income>250000&&c.income<=500000},
+    {label:'₹5L – ₹10L',    fn:c=>c.income>500000&&c.income<=1000000},
+    {label:'Above ₹10L',     fn:c=>c.income>1000000},
+  ];
+  const bandDiv=document.createElement('div'); bandDiv.className='card';
+  let bandHTML=`<div class="tbl-wrap"><table><thead><tr>
+    <th>Income Band</th><th>Citizens</th><th>Applications</th><th>Approved</th>
+    <th>Total Benefit</th><th>Avg Benefit</th><th>Coverage %</th>
+  </tr></thead><tbody>`;
+  bands.forEach(b=>{
+    const cits=allCits.filter(b.fn).length;
+    const bApps=apps.filter(a=>b.fn(a.citizen));
+    const bAppr=bApps.filter(a=>a.status==='APPROVED'||a.status==='DISBURSED');
+    const amt=bAppr.reduce((s,a)=>s+a.benefit,0);
+    const avg=bAppr.length?Math.round(amt/bAppr.length):0;
+    const covW=cits?Math.round(bAppr.length*100/cits):0;
+    bandHTML+=`<tr>
+      <td class="td-bold">${b.label}</td>
+      <td>${cits}</td>
+      <td>${bApps.length}</td>
+      <td style="color:var(--green);font-weight:600;">${bAppr.length}</td>
+      <td>₹${(amt/100000).toFixed(1)}L</td>
+      <td>₹${avg.toLocaleString('en-IN')}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="fund-bar-track" style="width:80px;"><div class="fund-fill ff-good" style="width:${covW}%"></div></div>
+          <span style="font-size:10.5px;color:var(--grey);">${covW}%</span>
+        </div>
+      </td></tr>`;
+  });
+  bandHTML+='</tbody></table></div>';
+  bandDiv.innerHTML=bandHTML;
+  body.appendChild(bandDiv);
+
+  // ── A10: Officer Performance (SQL Q16) — national only
+  if(isNational){
+    body.innerHTML+=`<div class="an-section mt16"><h3>👮 Officer Performance Report <small style="font-weight:400;color:var(--grey);font-size:11px;">— SQL Q16: approval rate per officer, avg processing time</small></h3>`;
+    const offData={};
+    APPLICATIONS.forEach(a=>{
+      const oid=a.officerId;
+      if(!offData[oid]) offData[oid]={officer:a.officer,total:0,approved:0,rejected:0,amt:0};
+      offData[oid].total++;
+      if(a.status==='APPROVED'||a.status==='DISBURSED'){offData[oid].approved++;offData[oid].amt+=a.benefit;}
+      if(a.status==='REJECTED') offData[oid].rejected++;
+    });
+    const offDiv=document.createElement('div'); offDiv.className='card';
+    const offSorted=Object.values(offData).filter(d=>d.total>0).sort((a,b)=>b.approved-a.approved);
+    let offHTML=`<div class="tbl-wrap"><table><thead><tr>
+      <th>Officer</th><th>State</th><th>Dept</th><th>Handled</th>
+      <th>Approved</th><th>Rejected</th><th>Approval Rate</th><th>Disbursed</th>
+    </tr></thead><tbody>`;
+    offSorted.forEach(d=>{
+      const rate=d.total?Math.round(d.approved*100/d.total):0;
+      const col=rate>=70?'var(--green)':rate>=40?'var(--amber)':'var(--red)';
+      offHTML+=`<tr>
+        <td class="td-bold">${d.officer.name}</td>
+        <td>${d.officer.state}</td>
+        <td>${d.officer.dept}</td>
+        <td>${d.total}</td>
+        <td style="color:var(--green);font-weight:600;">${d.approved}</td>
+        <td style="color:var(--red);">${d.rejected}</td>
+        <td style="color:${col};font-weight:700;">${rate}%</td>
+        <td>₹${(d.amt/100000).toFixed(1)}L</td></tr>`;
+    });
+    offHTML+='</tbody></table></div>';
+    offDiv.innerHTML=offHTML;
+    body.appendChild(offDiv);
+    body.innerHTML+='</div>';
+  }
+
+  // ── A11: Multi-scheme applicants
+  body.innerHTML+=`<div class="an-section mt16"><h3>🔗 Multi-Scheme Applicants <small style="font-weight:400;color:var(--grey);font-size:11px;">— overlap analysis, duplicate beneficiary detection</small></h3>`;
+  const multiMap={};
+  apps.forEach(a=>{
+    if(!multiMap[a.citizenId]) multiMap[a.citizenId]={citizen:a.citizen,schemes:[]};
+    multiMap[a.citizenId].schemes.push(a.scheme.name+'('+a.status+')');
+  });
+  const multiDiv=document.createElement('div'); multiDiv.className='card';
+  const multiList=Object.values(multiMap).filter(d=>d.schemes.length>1)
+    .sort((a,b)=>b.schemes.length-a.schemes.length).slice(0,12);
+  let mHTML=`<div class="tbl-wrap"><table><thead><tr>
+    <th>Citizen</th><th>Category</th><th>Income</th><th>State</th><th>Scheme Count</th><th>Schemes</th>
+  </tr></thead><tbody>`;
+  if(multiList.length){
+    multiList.forEach(d=>{
+      mHTML+=`<tr>
+        <td class="td-bold">${d.citizen.name}</td>
+        <td><span class="badge b-${d.citizen.category.toLowerCase()}">${d.citizen.category}</span></td>
+        <td>₹${d.citizen.income.toLocaleString('en-IN')}</td>
+        <td>${d.citizen.state}</td>
+        <td style="font-weight:700;color:var(--teal);">${d.schemes.length}</td>
+        <td style="font-size:11px;color:var(--text-s);">${d.schemes.join(' · ')}</td></tr>`;
+    });
+  } else {
+    mHTML+='<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--grey);">No multi-scheme applicants found</td></tr>';
+  }
+  mHTML+='</tbody></table></div>';
+  multiDiv.innerHTML=mHTML;
+  body.appendChild(multiDiv);
+
+  body.innerHTML+='<div style="height:24px;"></div>';
+}
+
+
+// ════════════════════════════════════════════════════════
+//  PAGINATION
+// ════════════════════════════════════════════════════════
+function renderPagination(key){
+  const ps = pagState[key];
+  const total = ps.data.length;
+  const totalPages = Math.ceil(total/ps.perPage);
+  const pagId = key==='dash'?'dash-pag':key==='cit'?'cit-pag':'app-pag';
+  const el = document.getElementById(pagId);
+  if(!el) return;
+  if(totalPages<=1){ el.innerHTML=''; return; }
+
+  const start=(ps.page-1)*ps.perPage+1;
+  const end=Math.min(ps.page*ps.perPage,total);
+  let html=`<span class="pag-info">${start}–${end} of ${total}</span>`;
+  html+=`<button class="pag-btn" ${ps.page<=1?'disabled':''} onclick="changePage('${key}',${ps.page-1})">‹ Prev</button>`;
+
+  // show limited page buttons
+  let startP=Math.max(1,ps.page-2); let endP=Math.min(totalPages,startP+4);
+  startP=Math.max(1,endP-4);
+  for(let i=startP;i<=endP;i++){
+    html+=`<button class="pag-btn ${i===ps.page?'active':''}" onclick="changePage('${key}',${i})">${i}</button>`;
+  }
+  html+=`<button class="pag-btn" ${ps.page>=totalPages?'disabled':''} onclick="changePage('${key}',${ps.page+1})">Next ›</button>`;
+  el.innerHTML=html;
+}
+
+function changePage(key,page){
+  pagState[key].page=page;
+  if(key==='dash') renderDashTable();
+  if(key==='cit')  renderCitTable();
+  if(key==='app')  renderAppTable();
+  document.getElementById('page-'+(key==='dash'?'dashboard':key==='cit'?'citizens':'applications')).scrollIntoView({behavior:'smooth'});
+}
+
+// ════════════════════════════════════════════════════════
+//  FILTERS
+// ════════════════════════════════════════════════════════
+function toggleFilter(prefix){
+  const toggle = document.getElementById(prefix+'-filter-toggle');
+  const inner  = document.getElementById(prefix+'-filter-inner');
+  toggle.classList.toggle('open');
+  inner.classList.toggle('open');
+}
+
+function incomeGroup(inc){
+  if(inc<=100000) return 'bpl';
+  if(inc<=250000) return 'low';
+  if(inc<=500000) return 'mid';
+  return 'high';
+}
+
+function updateChips(prefix, filters){
+  const container = document.getElementById(prefix+'-chips');
+  if(!container) return;
+  container.innerHTML='';
+  const labels={
+    inc:{bpl:'Below ₹1L',low:'₹1L–₹2.5L',mid:'₹2.5L–₹5L',high:'Above ₹5L'},
+    status:{SUBMITTED:'Submitted',UNDER_REVIEW:'Under Review',APPROVED:'Approved',DISBURSED:'Disbursed',REJECTED:'Rejected'}
+  };
+  Object.entries(filters).forEach(([k,v])=>{
+    if(!v) return;
+    let label=v;
+    if(k==='inc') label='Income: '+(labels.inc[v]||v);
+    else if(k==='cat') label='Category: '+v;
+    else if(k==='st') label='State: '+v;
+    else if(k==='loc') label='Location: '+v;
+    else if(k==='sch') label='Scheme: '+(SCHEMES.find(s=>s.id===parseInt(v))?.name||v);
+    else if(k==='status') label='Status: '+v;
+    else if(k==='srch') label='Search: '+v;
+    else return;
+    const chip=document.createElement('div');
+    chip.className='filter-chip';
+    chip.innerHTML=label+`<button onclick="removeFilter('${prefix}','${k}')">×</button>`;
+    container.appendChild(chip);
+  });
+}
+
+function removeFilter(prefix,key){
+  const map={dash:{inc:'df-income',cat:'df-cat',st:'df-state',sch:'df-scheme'},
+             cit:{inc:'cf-income',cat:'cf-cat',st:'cf-state',loc:'cf-loc'},
+             app:{status:'af-status',sch:'af-scheme',cat:'af-cat',st:'af-state'}};
+  const elId=map[prefix]?.[key]; if(!elId) return;
+  document.getElementById(elId).value='';
+  if(prefix==='dash') applyDashFilter();
+  if(prefix==='cit')  applyCitFilter();
+  if(prefix==='app')  applyAppFilter();
+}
+
+// ════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════
+function statusPillHtml(status){
+  const map={
+    SUBMITTED:'p-submitted',UNDER_REVIEW:'p-review',
+    APPROVED:'p-approved',DISBURSED:'p-disbursed',REJECTED:'p-rejected'
+  };
+  return `<span class="pill ${map[status]||''}">${status.replace('_',' ')}</span>`;
+}
+
+function showToast(msg, type='info'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast show t-'+type;
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+</script>
+</body>
+</html>
