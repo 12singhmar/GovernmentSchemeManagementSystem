@@ -7,17 +7,7 @@
 --  Akshaj Singhmar (1024030493)
 --  Guide: Dr. Reaya Grewal
 -- ============================================================
--- Oracle SQL + PL/SQL
--- Run on: https://livesql.oracle.com
--- Enable DBMS_OUTPUT before running PL/SQL blocks
--- ============================================================
 
-
--- ============================================================
---  PART 1 — TABLE DEFINITIONS (DDL)
--- ============================================================
-
--- departments — one row per ministry/department that owns schemes
 CREATE TABLE Department (
     department_id    NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     department_name  VARCHAR2(100) NOT NULL UNIQUE,
@@ -27,7 +17,6 @@ CREATE TABLE Department (
     established_year NUMBER(4) CHECK (established_year BETWEEN 1947 AND 2025)
 );
 
--- schemes — both major and minor welfare programmes
 CREATE TABLE Scheme (
     scheme_id           NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     scheme_name         VARCHAR2(150) NOT NULL UNIQUE,
@@ -45,8 +34,6 @@ CREATE TABLE Scheme (
     CONSTRAINT chk_benefit CHECK (max_benefit_amount >= base_benefit_amount)
 );
 
--- eligibility rules per scheme — the rule engine table
--- keeping rules here means adding a new criterion is just an INSERT, no code change
 CREATE TABLE Scheme_Eligibility_Rules (
     rule_id            NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     scheme_id          NUMBER NOT NULL,
@@ -64,7 +51,6 @@ CREATE TABLE Scheme_Eligibility_Rules (
         REFERENCES Scheme(scheme_id)
 );
 
--- fund pool — tracks total budget vs what has actually been disbursed
 CREATE TABLE Scheme_Fund_Pool (
     pool_id          NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     scheme_id        NUMBER NOT NULL UNIQUE,
@@ -76,8 +62,6 @@ CREATE TABLE Scheme_Fund_Pool (
         REFERENCES Scheme(scheme_id)
 );
 
--- officers — government staff who process and approve applications
--- NOTE: assigned_district/state allow NULL so we can insert a national supervisor
 CREATE TABLE Officer (
     officer_id        NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     officer_name      VARCHAR2(100) NOT NULL,
@@ -93,7 +77,6 @@ CREATE TABLE Officer (
         REFERENCES Department(department_id)
 );
 
--- citizens — core beneficiary table, Aadhaar is the unique identifier
 CREATE TABLE Citizen (
     citizen_id         NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     aadhaar_number     CHAR(12) NOT NULL UNIQUE,
@@ -115,11 +98,9 @@ CREATE TABLE Citizen (
     ifsc_code          VARCHAR2(11) NOT NULL,
     is_verified        CHAR(1) DEFAULT 'N' CHECK (is_verified IN ('Y','N')),
     registration_date  DATE DEFAULT SYSDATE,
-    -- using [0-9]{12} instead of \d{12} — Oracle regex doesn't support \d
     CONSTRAINT chk_aadhaar CHECK (REGEXP_LIKE(aadhaar_number, '^[0-9]{12}$'))
 );
 
--- citizen documents — aadhaar, income certs, caste certs etc.
 CREATE TABLE Citizen_Documents (
     doc_id       NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     citizen_id   NUMBER NOT NULL,
@@ -137,11 +118,6 @@ CREATE TABLE Citizen_Documents (
         REFERENCES Officer(officer_id)
 );
 
--- applications — the heart of the workflow
--- NOTE: removed UNIQUE(citizen_id, scheme_id) from here
---       because it would block reapplication after rejection
---       the trg_no_duplicate_app trigger handles this correctly
---       (it checks status NOT IN ('REJECTED') so rejected citizens can reapply)
 CREATE TABLE Application (
     application_id   NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     citizen_id       NUMBER NOT NULL,
@@ -164,7 +140,6 @@ CREATE TABLE Application (
         REFERENCES Officer(officer_id)
 );
 
--- fund disbursement — DBT (Direct Benefit Transfer) simulation
 CREATE TABLE Fund_Disbursement (
     disbursement_id   NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     application_id    NUMBER NOT NULL UNIQUE,
@@ -180,8 +155,6 @@ CREATE TABLE Fund_Disbursement (
         REFERENCES Application(application_id)
 );
 
--- audit log — auto-populated by trigger on every status change
--- this gives a tamper-proof trail of who changed what and when
 CREATE TABLE Application_Audit_Log (
     audit_id       NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     application_id NUMBER NOT NULL,
@@ -192,11 +165,6 @@ CREATE TABLE Application_Audit_Log (
     CONSTRAINT fk_audit_app FOREIGN KEY (application_id)
         REFERENCES Application(application_id)
 );
-
-
--- ============================================================
---  PART 2 — MASTER DATA
--- ============================================================
 
 -- 7 departments matching India's ministry structure
 INSERT INTO Department (department_name, department_code, ministry, head_name, established_year)
@@ -286,60 +254,59 @@ VALUES ('Divyang Sahayata Yojana', 'DSY-2015', 6, 'MINOR',
 
 COMMIT;
 
--- eligibility rules — one row per scheme, read by check_eligibility()
 INSERT INTO Scheme_Eligibility_Rules
     (scheme_id, min_age, max_age, max_income, allowed_categories, location_type, min_land_acres)
 VALUES (1, 18, 75, 250000, 'ALL', 'ALL', 0.1);
--- scheme 1: KSY — farmers, income < 2.5L, must hold at least 0.1 acres
+-- scheme 1: KSY - farmers, income < 2.5L, must hold at least 0.1 acres
 
 INSERT INTO Scheme_Eligibility_Rules
     (scheme_id, min_age, max_age, max_income, allowed_categories, location_type)
 VALUES (2, 21, 70, 300000, 'ALL', 'RURAL');
--- scheme 2: GAY — rural only, income < 3L
+-- scheme 2: GAY - rural only, income < 3L
 
 INSERT INTO Scheme_Eligibility_Rules
     (scheme_id, min_age, max_age, max_income, allowed_categories, location_type)
 VALUES (3, 0, 120, 500000, 'ALL', 'ALL');
--- scheme 3: SSY — any age, income < 5L
+-- scheme 3: SSY - any age, income < 5L
 
 INSERT INTO Scheme_Eligibility_Rules
     (scheme_id, min_age, max_age, allowed_categories, location_type)
 VALUES (4, 18, 60, 'ALL', 'RURAL');
--- scheme 4: GRGS — rural adults, no income cap
+-- scheme 4: GRGS - rural adults, no income cap
 
 INSERT INTO Scheme_Eligibility_Rules
     (scheme_id, min_age, max_age, max_income, allowed_categories, location_type, gender_restriction)
 VALUES (5, 18, 120, 200000, 'ALL', 'ALL', 'F');
--- scheme 5: URY — women only, BPL (income < 2L)
+-- scheme 5: URY - women only, BPL (income < 2L)
 
 INSERT INTO Scheme_Eligibility_Rules
     (scheme_id, min_age, max_age, max_income, min_income, allowed_categories, location_type)
 VALUES (6, 21, 120, 1500000, 100000, 'ALL', 'ALL');
--- scheme 6: Solar — income between 1L and 15L (not too poor, not too rich)
+-- scheme 6: Solar - income between 1L and 15L (not too poor, not too rich)
 
 INSERT INTO Scheme_Eligibility_Rules
     (scheme_id, min_age, max_age, max_income, allowed_categories, location_type, gender_restriction)
 VALUES (7, 18, 55, 500000, 'SC,ST,OBC', 'ALL', 'F');
--- scheme 7: NSUY — SC/ST/OBC women only, income < 5L, age below 55
+-- scheme 7: NSUY - SC/ST/OBC women only, income < 5L, age below 55
 
 INSERT INTO Scheme_Eligibility_Rules
     (scheme_id, min_age, max_age, max_income, allowed_categories, location_type)
 VALUES (8, 18, 30, 250000, 'SC,ST', 'ALL');
--- scheme 8: SCSS — SC/ST students only, income < 2.5L, age <= 30
+-- scheme 8: SCSS - SC/ST students only, income < 2.5L, age <= 30
 
 INSERT INTO Scheme_Eligibility_Rules
     (scheme_id, min_age, max_age, max_income, allowed_categories, location_type, min_land_acres)
 VALUES (9, 18, 70, 350000, 'ALL', 'ALL', 0.5);
--- scheme 9: KYA — farmers with at least 0.5 acres, income < 3.5L
+-- scheme 9: KYA - farmers with at least 0.5 acres, income < 3.5L
 
 INSERT INTO Scheme_Eligibility_Rules
     (scheme_id, min_age, max_age, allowed_categories, location_type)
 VALUES (10, 0, 120, 'ALL', 'ALL');
--- scheme 10: DSY — open to all, disability-based (no income/category filter)
+-- scheme 10: DSY - open to all, disability-based (no income/category filter)
 
 COMMIT;
 
--- fund pools for FY 2024-25
+-- fund pools taken acc. to govt data - FY 2024-25
 INSERT INTO Scheme_Fund_Pool (scheme_id, financial_year, total_budget, disbursed_amount)
 VALUES (1,  '2024-25', 75000000000, 0);
 INSERT INTO Scheme_Fund_Pool (scheme_id, financial_year, total_budget, disbursed_amount)
@@ -364,7 +331,6 @@ VALUES (10, '2024-25', 800000000,   0);
 COMMIT;
 
 -- officers (30 district officers + 1 national supervisor)
--- supervisor has NULL district/state because they see everything
 INSERT INTO Officer (officer_name, employee_code, department_id, designation,
     assigned_district, assigned_state, phone, join_date)
 VALUES ('Central Supervisor NIC', 'SUP000', 1, 'National Coordinator GSMS',
@@ -522,12 +488,7 @@ VALUES ('Nandita Ghosh','EMP030',3,'Health Programme Officer',
 
 COMMIT;
 
-
--- ============================================================
---  PART 3 — VIEWS
--- ============================================================
-
--- full application pipeline — good for officer dashboards
+-- full application pipeline
 CREATE OR REPLACE VIEW V_APPLICATION_PIPELINE AS
 SELECT
     a.application_id,
@@ -592,13 +553,9 @@ LEFT JOIN Application a ON o.officer_id = a.officer_id
 GROUP BY o.officer_id, o.officer_name, o.assigned_state, d.department_name;
 
 
--- ============================================================
---  PART 4 — PL/SQL FUNCTIONS
--- ============================================================
+-- PL/SQL
 
 -- FUNCTION 1: check_eligibility
--- reads Scheme_Eligibility_Rules table — no eligibility logic is hard-coded here
--- returns 'ELIGIBLE' or a descriptive reason string
 CREATE OR REPLACE FUNCTION check_eligibility(
     p_citizen_id IN NUMBER,
     p_scheme_id  IN NUMBER
@@ -614,7 +571,6 @@ CREATE OR REPLACE FUNCTION check_eligibility(
     v_gen_req  VARCHAR2(5); v_min_land NUMBER;
 
 BEGIN
-    -- check if scheme is even active
     SELECT is_active INTO v_active
     FROM Scheme WHERE scheme_id = p_scheme_id;
 
@@ -622,57 +578,47 @@ BEGIN
         RETURN 'INELIGIBLE: Scheme is currently inactive';
     END IF;
 
-    -- get citizen profile
     SELECT age, annual_income, category, location_type, gender, land_holding_acres
     INTO v_age, v_income, v_category, v_location, v_gender, v_land
     FROM Citizen WHERE citizen_id = p_citizen_id;
 
-    -- get the eligibility rules for this scheme from the rule engine table
     SELECT min_age, max_age, max_income, min_income,
            allowed_categories, location_type, gender_restriction, min_land_acres
     INTO v_min_age, v_max_age, v_max_inc, v_min_inc,
          v_cats, v_loc_req, v_gen_req, v_min_land
     FROM Scheme_Eligibility_Rules WHERE scheme_id = p_scheme_id;
 
-    -- age check
     IF v_age < v_min_age OR v_age > v_max_age THEN
         RETURN 'INELIGIBLE: Age ' || v_age || ' out of range ['
                || v_min_age || '-' || v_max_age || ']';
     END IF;
 
-    -- income upper limit
     IF v_max_inc IS NOT NULL AND v_income > v_max_inc THEN
         RETURN 'INELIGIBLE: Income Rs.' || v_income
                || ' exceeds limit of Rs.' || v_max_inc;
     END IF;
 
-    -- income lower limit (solar scheme needs minimum income)
     IF v_income < v_min_inc THEN
         RETURN 'INELIGIBLE: Income Rs.' || v_income
                || ' below minimum Rs.' || v_min_inc;
     END IF;
 
-    -- category check — using comma-delimited match, not INSTR
-    -- wrapping with commas avoids partial matches like SC matching inside SCSS
     IF v_cats != 'ALL' AND
        ',' || v_cats || ',' NOT LIKE '%,' || v_category || ',%' THEN
         RETURN 'INELIGIBLE: Category ' || v_category
                || ' not eligible. Allowed: ' || v_cats;
     END IF;
 
-    -- location check
     IF v_loc_req != 'ALL' AND v_location != v_loc_req THEN
         RETURN 'INELIGIBLE: Scheme is for ' || v_loc_req || ' residents only';
     END IF;
 
-    -- gender check
     IF v_gen_req != 'ALL' AND v_gender != v_gen_req THEN
         RETURN 'INELIGIBLE: Scheme is restricted to '
                || CASE WHEN v_gen_req = 'F' THEN 'female' ELSE 'male' END
                || ' applicants only';
     END IF;
 
-    -- land holding check (for farmer schemes)
     IF v_min_land > 0 AND v_land < v_min_land THEN
         RETURN 'INELIGIBLE: Land holding ' || v_land
                || ' acres is below minimum ' || v_min_land || ' acres';
@@ -688,8 +634,6 @@ END check_eligibility;
 
 
 -- FUNCTION 2: calculate_benefit
--- computes the actual DBT amount — not a flat number
--- poorer + SC/ST + rural + elderly = higher benefit, capped at scheme max
 CREATE OR REPLACE FUNCTION calculate_benefit(
     p_citizen_id IN NUMBER,
     p_scheme_id  IN NUMBER
@@ -709,7 +653,6 @@ BEGIN
     INTO v_income, v_category, v_location, v_age
     FROM Citizen WHERE citizen_id = p_citizen_id;
 
-    -- income-based scaling factor — poorest get 100% of base
     IF    v_income <= 50000  THEN v_factor := 1.00;
     ELSIF v_income <= 150000 THEN v_factor := 0.88;
     ELSIF v_income <= 300000 THEN v_factor := 0.75;
@@ -719,18 +662,14 @@ BEGIN
 
     v_benefit := v_base * v_factor;
 
-    -- category bonuses as per policy
     IF v_category IN ('SC','ST') THEN v_benefit := v_benefit * 1.20;
     ELSIF v_category = 'OBC'     THEN v_benefit := v_benefit * 1.10;
     END IF;
 
-    -- rural citizens get a small extra bonus
     IF v_location = 'RURAL' THEN v_benefit := v_benefit * 1.08; END IF;
 
-    -- senior citizens (60+) get an additional bonus
     IF v_age >= 60 THEN v_benefit := v_benefit * 1.12; END IF;
 
-    -- cap it at the scheme maximum
     RETURN LEAST(ROUND(v_benefit, 2), v_max);
 
 EXCEPTION
@@ -742,7 +681,6 @@ END calculate_benefit;
 
 -- FUNCTION 3: get_priority_score
 -- scores each citizen 0-100 so officers can process most vulnerable first
--- max 100 = rural ST citizen aged 60+ earning under Rs.50,000
 CREATE OR REPLACE FUNCTION get_priority_score(
     p_citizen_id IN NUMBER
 ) RETURN NUMBER AS
@@ -756,7 +694,6 @@ BEGIN
     INTO v_income, v_category, v_location, v_age
     FROM Citizen WHERE citizen_id = p_citizen_id;
 
-    -- income: up to 50 points, inverse relation (lower income = higher score)
     IF    v_income <= 50000  THEN v_score := v_score + 50;
     ELSIF v_income <= 100000 THEN v_score := v_score + 44;
     ELSIF v_income <= 200000 THEN v_score := v_score + 36;
@@ -765,19 +702,16 @@ BEGIN
     ELSE                          v_score := v_score + 5;
     END IF;
 
-    -- category: up to 25 points
     IF    v_category = 'ST'  THEN v_score := v_score + 25;
     ELSIF v_category = 'SC'  THEN v_score := v_score + 22;
     ELSIF v_category = 'OBC' THEN v_score := v_score + 14;
     ELSE                          v_score := v_score + 5;
     END IF;
 
-    -- location: rural gets 15, urban gets 5
     IF v_location = 'RURAL' THEN v_score := v_score + 15;
     ELSE                         v_score := v_score + 5;
     END IF;
 
-    -- senior citizen bonus
     IF v_age >= 60 THEN v_score := v_score + 10; END IF;
 
     RETURN v_score;
@@ -789,8 +723,6 @@ END get_priority_score;
 
 
 -- FUNCTION 4: is_duplicate_app
--- returns Y if citizen already has a live (non-rejected) application for this scheme
--- used as a guard in apply_scheme before inserting
 CREATE OR REPLACE FUNCTION is_duplicate_app(
     p_citizen_id IN NUMBER,
     p_scheme_id  IN NUMBER
@@ -811,7 +743,6 @@ END is_duplicate_app;
 
 
 -- FUNCTION 5: get_scheme_utilization
--- returns what % of the budget has been spent for a scheme
 CREATE OR REPLACE FUNCTION get_scheme_utilization(
     p_scheme_id IN NUMBER
 ) RETURN NUMBER AS
@@ -828,15 +759,8 @@ EXCEPTION
 END get_scheme_utilization;
 /
 
-
--- ============================================================
---  PART 5 — STORED PROCEDURES
--- ============================================================
-
+    
 -- PROCEDURE 1: generate_citizen_data
--- generates 1000 realistic citizens — distributions match Census 2011
--- state weights: UP 17x, MH 9x, Bihar 9x... etc
--- income is right-skewed: 40% earn below Rs 1L (matching actual India poverty data)
 CREATE OR REPLACE PROCEDURE generate_citizen_data AS
 
     TYPE str_arr IS TABLE OF VARCHAR2(100);
@@ -875,7 +799,6 @@ CREATE OR REPLACE PROCEDURE generate_citizen_data AS
         'Desai','Mehta','Jadhav','Patil','More','Kamble','Jain'
     );
 
-    -- states weighted by population so data looks realistic
     v_states str_arr := str_arr(
         'Uttar Pradesh','Uttar Pradesh','Uttar Pradesh','Uttar Pradesh','Uttar Pradesh',
         'Uttar Pradesh','Uttar Pradesh','Uttar Pradesh','Uttar Pradesh','Uttar Pradesh',
@@ -898,7 +821,6 @@ CREATE OR REPLACE PROCEDURE generate_citizen_data AS
         'Jharkhand','Chhattisgarh','Assam','Haryana','Kerala','Uttarakhand'
     );
 
-    -- district arrays per state — properly mapped so a UP citizen gets a UP district
     v_up_dist    str_arr := str_arr('Lucknow','Varanasi','Agra','Kanpur','Prayagraj',
                                      'Gorakhpur','Meerut','Bareilly','Aligarh','Moradabad');
     v_mh_dist    str_arr := str_arr('Pune','Mumbai','Nagpur','Nashik','Aurangabad',
@@ -947,7 +869,6 @@ CREATE OR REPLACE PROCEDURE generate_citizen_data AS
         'ICIC0001234','BARB0001234','MAHB0001234','IOBA0001234'
     );
 
-    -- working variables
     v_gender    CHAR(1);
     v_fname     VARCHAR2(100);
     v_sname     VARCHAR2(100);
@@ -1000,11 +921,9 @@ BEGIN
 
         v_category := v_categories(ROUND(DBMS_RANDOM.VALUE(1, v_categories.COUNT)));
 
-        -- state selection (population-weighted)
         v_state_idx := ROUND(DBMS_RANDOM.VALUE(1, v_states.COUNT));
         v_state     := v_states(v_state_idx);
 
-        -- district properly matched to state — fixes earlier bug where districts were mismatched
         IF    v_state = 'Uttar Pradesh'   THEN v_district := v_up_dist(ROUND(DBMS_RANDOM.VALUE(1, v_up_dist.COUNT)));
         ELSIF v_state = 'Maharashtra'     THEN v_district := v_mh_dist(ROUND(DBMS_RANDOM.VALUE(1, v_mh_dist.COUNT)));
         ELSIF v_state = 'Bihar'           THEN v_district := v_br_dist(ROUND(DBMS_RANDOM.VALUE(1, v_br_dist.COUNT)));
@@ -1021,7 +940,6 @@ BEGIN
         ELSE v_district := v_other_dist(ROUND(DBMS_RANDOM.VALUE(1, v_other_dist.COUNT)));
         END IF;
 
-        -- 65% rural (Census 2011 — India is still mostly rural)
         IF DBMS_RANDOM.VALUE(0,100) <= 65 THEN
             v_location := 'RURAL';
             v_village  := 'Village-' || ROUND(DBMS_RANDOM.VALUE(1,999));
@@ -1030,7 +948,6 @@ BEGIN
             v_village  := v_district;
         END IF;
 
-        -- income: right-skewed distribution matching actual India
         -- 40% BPL, 30% low, 15% mid, 10% upper-mid, 5% high
         v_inc_rand := DBMS_RANDOM.VALUE(0,100);
         IF    v_inc_rand <= 40 THEN v_income := ROUND(DBMS_RANDOM.VALUE(20000,  100000), -2);
@@ -1042,7 +959,6 @@ BEGIN
 
         v_occ := v_occupations(ROUND(DBMS_RANDOM.VALUE(1, v_occupations.COUNT)));
 
-        -- only farmers and agri labourers have land
         IF v_occ IN ('Farmer','Agricultural Labourer') THEN
             v_land := ROUND(DBMS_RANDOM.VALUE(0.5, 8), 1);
         ELSE
@@ -1069,7 +985,6 @@ BEGIN
                 SYSDATE - ROUND(DBMS_RANDOM.VALUE(0,365))
             );
         EXCEPTION
-            -- skip duplicates per row, don't roll back the whole thing
             WHEN DUP_VAL_ON_INDEX THEN NULL;
         END;
 
@@ -1095,9 +1010,6 @@ BEGIN generate_citizen_data; END;
 
 
 -- PROCEDURE 2: generate_sample_applications
--- uses explicit cursors to generate realistic application data
--- each cursor targets citizens who actually match the scheme eligibility
--- status distribution is weighted to look like a real pipeline
 CREATE OR REPLACE PROCEDURE generate_sample_applications AS
 
     -- c_farmers: for Kisan Samman Yojana — farmers with land, income < 2.5L
@@ -1127,8 +1039,6 @@ CREATE OR REPLACE PROCEDURE generate_sample_applications AS
     v_app_date   DATE;
     v_elig       VARCHAR2(200);
 
-    -- status list weighted to mirror a real pipeline
-    -- 2 submitted, 1 under review, 2 approved, 1 rejected, 1 disbursed
     TYPE status_list IS TABLE OF VARCHAR2(20);
     v_statuses status_list := status_list(
         'SUBMITTED','SUBMITTED','UNDER_REVIEW',
@@ -1222,7 +1132,6 @@ END generate_sample_applications;
 BEGIN generate_sample_applications; END;
 /
 
--- insert disbursement records for all approved/disbursed applications
 INSERT INTO Fund_Disbursement (
     application_id, amount, disbursement_date,
     payment_mode, transaction_ref, bank_account, status
@@ -1243,14 +1152,10 @@ WHERE a.status IN ('APPROVED','DISBURSED')
       WHERE fd.application_id = a.application_id
   );
 
--- NOTE: trg_fund_pool_update fires on each INSERT above and handles the pool update
--- no manual UPDATE to Scheme_Fund_Pool needed here — the trigger does it
 COMMIT;
 
 
 -- PROCEDURE 3: apply_scheme
--- main entry point for submitting a new application
--- validates everything before inserting — no bad data goes in
 CREATE OR REPLACE PROCEDURE apply_scheme(
     p_citizen_id IN NUMBER,
     p_scheme_id  IN NUMBER,
@@ -1324,9 +1229,6 @@ END apply_scheme;
 
 
 -- PROCEDURE 4: approve_application
--- officer approves or rejects — all done atomically in one transaction
--- NOTE: trg_fund_pool_update handles pool balance update after disbursement insert
---       so no manual Scheme_Fund_Pool UPDATE is needed here
 CREATE OR REPLACE PROCEDURE approve_application(
     p_app_id     IN NUMBER,
     p_officer_id IN NUMBER,
@@ -1362,7 +1264,6 @@ BEGIN
 
     IF UPPER(p_action) = 'APPROVE' THEN
 
-        -- check funds before committing
         SELECT total_budget - disbursed_amount INTO v_fund_left
         FROM Scheme_Fund_Pool WHERE scheme_id = v_scheme_id;
 
@@ -1373,15 +1274,12 @@ BEGIN
                 'Insufficient funds in scheme pool. Available: Rs.' || v_fund_left);
         END IF;
 
-        -- update status to DISBURSED directly (APPROVED is just an intermediate step)
         UPDATE Application
         SET status = 'DISBURSED',
             approval_date = SYSDATE,
             remarks = NVL(p_remarks, remarks)
         WHERE application_id = p_app_id;
-        -- trg_application_audit fires here (status change)
 
-        -- insert disbursement record
         SELECT bank_account INTO v_bank
         FROM Citizen WHERE citizen_id = v_citizen_id;
 
@@ -1393,8 +1291,6 @@ BEGIN
         ) VALUES (
             p_app_id, v_benefit, SYSDATE, 'DBT', v_txn, v_bank, 'PROCESSED'
         );
-        -- trg_fund_pool_update fires here — updates Scheme_Fund_Pool automatically
-        -- no manual UPDATE to pool needed
 
         COMMIT;
         DBMS_OUTPUT.PUT_LINE('Approved. Disbursed Rs.' || v_benefit);
@@ -1406,7 +1302,6 @@ BEGIN
             rejection_reason = NVL(p_remarks, 'Rejected during officer review'),
             approval_date = SYSDATE
         WHERE application_id = p_app_id;
-        -- trg_application_audit fires here too
 
         COMMIT;
         DBMS_OUTPUT.PUT_LINE('Application ' || p_app_id || ' rejected.');
@@ -1425,8 +1320,6 @@ END approve_application;
 
 
 -- PROCEDURE 5: generate_scheme_report
--- cursor-based formatted report to DBMS_OUTPUT
--- shows scheme-wise performance with totals at the bottom
 CREATE OR REPLACE PROCEDURE generate_scheme_report AS
 
     CURSOR c_report IS
@@ -1494,14 +1387,8 @@ END generate_scheme_report;
 /
 
 
--- ============================================================
---  PART 6 — TRIGGERS
--- ============================================================
 
 -- TRIGGER 1: trg_application_audit
--- fires after every status change on Application
--- writes old + new status, user, and exact timestamp to audit log
--- this is the tamper-proof trail — no one can skip it
 CREATE OR REPLACE TRIGGER trg_application_audit
 AFTER UPDATE OF status ON Application
 FOR EACH ROW
@@ -1516,9 +1403,6 @@ END trg_application_audit;
 
 
 -- TRIGGER 2: trg_fund_pool_update
--- fires after every INSERT on Fund_Disbursement
--- keeps Scheme_Fund_Pool.disbursed_amount accurate automatically
--- approve_application relies on this — it does NOT do a manual pool UPDATE
 CREATE OR REPLACE TRIGGER trg_fund_pool_update
 AFTER INSERT ON Fund_Disbursement
 FOR EACH ROW
@@ -1543,9 +1427,6 @@ END trg_fund_pool_update;
 
 
 -- TRIGGER 3: trg_no_duplicate_app
--- fires before any INSERT on Application
--- blocks duplicate applications at the database level
--- allows reapplication only if previous application was REJECTED
 CREATE OR REPLACE TRIGGER trg_no_duplicate_app
 BEFORE INSERT ON Application
 FOR EACH ROW
@@ -1569,9 +1450,7 @@ END trg_no_duplicate_app;
 /
 
 
--- ============================================================
---  PART 7 — DEMO FLOW
--- ============================================================
+--  DEMO FLOW
 
 -- Step 1: register a demo citizen (Ramkali Devi from Varanasi)
 BEGIN
@@ -1678,16 +1557,13 @@ ORDER BY al.change_date ASC;
 
 
 -- ============================================================
---  PART 8 — SQL QUERIES (30 queries matching the report)
+--  SQL QUERIES 
 -- ============================================================
 
 
--- ╔══════════════════════════════════════════╗
 -- ║  SECTION 1 — BASIC VALIDATION (Q1–Q7)   ║
--- ╚══════════════════════════════════════════╝
 
 -- Q1: List all schemes with their department and benefit range
--- useful for verifying master data is set up correctly
 SELECT s.scheme_name, s.scheme_type, d.department_name,
        s.base_benefit_amount, s.max_benefit_amount, s.is_active
 FROM Scheme s
@@ -1696,7 +1572,6 @@ ORDER BY s.scheme_type, s.scheme_name;
 
 
 -- Q2: All citizens from a specific state sorted by income
--- shows the most economically vulnerable at the top
 SELECT full_name, state, district, category,
        annual_income, location_type, occupation
 FROM Citizen
@@ -1705,7 +1580,6 @@ ORDER BY annual_income ASC;
 
 
 -- Q3: Applications with full citizen and scheme details
--- three-table join — core application register
 SELECT a.application_id, c.full_name, c.aadhaar_number,
        s.scheme_name, a.status, a.apply_date, a.priority_score
 FROM Application a
@@ -1715,7 +1589,6 @@ ORDER BY a.apply_date DESC;
 
 
 -- Q4: All officers with department and assignment details
--- used to verify officer coverage across districts
 SELECT o.officer_name, o.designation, d.department_name,
        o.assigned_district, o.assigned_state
 FROM Officer o
@@ -1724,7 +1597,6 @@ ORDER BY o.assigned_state;
 
 
 -- Q5: Active schemes with current budget balance
--- shows remaining funds from the pool — live financial view
 SELECT s.scheme_name, s.scheme_type,
        sfp.total_budget, sfp.disbursed_amount,
        sfp.total_budget - sfp.disbursed_amount AS remaining_budget
@@ -1735,7 +1607,6 @@ ORDER BY sfp.total_budget DESC;
 
 
 -- Q6: Documents pending officer verification
--- sorted oldest first so nothing gets missed
 SELECT cd.doc_id, c.full_name, c.aadhaar_number,
        cd.doc_type, cd.upload_date, cd.status
 FROM Citizen_Documents cd
@@ -1745,7 +1616,6 @@ ORDER BY cd.upload_date ASC;
 
 
 -- Q7: Eligibility rules for all schemes from the rule engine table
--- shows the full rule set — confirms no hard-coding
 SELECT s.scheme_name, r.min_age, r.max_age,
        r.max_income, r.min_income, r.allowed_categories,
        r.location_type, r.gender_restriction, r.min_land_acres
@@ -1754,12 +1624,9 @@ JOIN Scheme s ON r.scheme_id = s.scheme_id
 ORDER BY s.scheme_name;
 
 
--- ╔═══════════════════════════════════════════════╗
 -- ║  SECTION 2 — BUSINESS LOGIC (Q8–Q14)         ║
--- ╚═══════════════════════════════════════════════╝
 
 -- Q8: Application count per scheme broken by status
--- good for spotting processing bottlenecks
 SELECT s.scheme_name, a.status,
        COUNT(*) AS count
 FROM Application a
@@ -1769,7 +1636,6 @@ ORDER BY s.scheme_name, a.status;
 
 
 -- Q9: Verified citizens eligible for Swasthya Suraksha who haven't applied yet
--- NOT EXISTS subquery — outreach targeting list
 SELECT c.citizen_id, c.full_name, c.state,
        c.category, c.annual_income
 FROM Citizen c
@@ -1783,7 +1649,6 @@ ORDER BY c.annual_income ASC;
 
 
 -- Q10: Officer daily queue — pending applications sorted by priority
--- highest vulnerability first, then oldest application
 SELECT a.application_id, c.full_name, c.category,
        c.annual_income, s.scheme_name,
        a.priority_score, a.apply_date,
@@ -1796,7 +1661,6 @@ ORDER BY a.priority_score DESC, a.apply_date ASC;
 
 
 -- Q11: Schemes with more than 50 applications
--- identifies over-subscribed schemes needing more officers or budget
 SELECT s.scheme_name,
        COUNT(a.application_id) AS total_applications
 FROM Scheme s
@@ -1807,7 +1671,6 @@ ORDER BY total_applications DESC;
 
 
 -- Q12: Citizens with multiple scheme applications
--- multi-scheme beneficiary tracking for policy analysis
 SELECT c.citizen_id, c.full_name, c.category, c.annual_income,
        COUNT(a.application_id) AS total_applications
 FROM Citizen c
@@ -1818,7 +1681,6 @@ ORDER BY total_applications DESC;
 
 
 -- Q13: Disbursements made in the last 30 days
--- month-end reconciliation query
 SELECT fd.disbursement_id, c.full_name, s.scheme_name,
        fd.amount, fd.disbursement_date,
        fd.payment_mode, fd.transaction_ref
@@ -1832,7 +1694,6 @@ ORDER BY fd.disbursement_date DESC;
 
 
 -- Q14: Rejected applications with rejection reasons
--- grievance and appeals analysis
 SELECT a.application_id, c.full_name, c.aadhaar_number,
        s.scheme_name, a.rejection_reason, a.approval_date
 FROM Application a
@@ -1842,12 +1703,9 @@ WHERE a.status = 'REJECTED'
 ORDER BY a.approval_date DESC;
 
 
--- ╔══════════════════════════════════════════════════╗
 -- ║  SECTION 3 — ANALYTICS & INSIGHTS (Q15–Q21)     ║
--- ╚══════════════════════════════════════════════════╝
 
 -- Q15: Total funds disbursed per scheme
--- financial summary with beneficiary count and average benefit
 SELECT s.scheme_name,
        NVL(SUM(fd.amount), 0)                       AS total_disbursed,
        COUNT(fd.disbursement_id)                     AS beneficiary_count,
@@ -1860,7 +1718,6 @@ ORDER BY total_disbursed DESC;
 
 
 -- Q16: Scheme budget utilisation with health classification
--- CRITICAL/MODERATE/HEALTHY — finance team alert system
 SELECT s.scheme_name,
        sfp.total_budget, sfp.disbursed_amount,
        sfp.total_budget - sfp.disbursed_amount AS remaining,
@@ -1876,7 +1733,6 @@ ORDER BY used_pct DESC;
 
 
 -- Q17: Rural vs urban beneficiary breakdown per scheme
--- geographic equity — checks rural coverage as promised by scheme mandates
 SELECT s.scheme_name, c.location_type,
        COUNT(DISTINCT a.citizen_id)    AS beneficiaries,
        NVL(SUM(fd.amount), 0)          AS total_amount
@@ -1890,7 +1746,6 @@ ORDER BY s.scheme_name, c.location_type;
 
 
 -- Q18: State-wise disbursed applications and total funds
--- which states are getting the most welfare support
 SELECT c.state,
        COUNT(DISTINCT a.application_id) AS disbursed_apps,
        NVL(SUM(fd.amount), 0)           AS total_funds,
@@ -1904,7 +1759,6 @@ ORDER BY total_funds DESC;
 
 
 -- Q19: Category-wise breakdown of benefits received
--- SC/ST/OBC/GEN equity analysis — validates constitutional priorities
 SELECT c.category,
        COUNT(DISTINCT c.citizen_id)                                    AS total_citizens,
        COUNT(a.application_id)                                         AS applications,
@@ -1918,7 +1772,6 @@ ORDER BY total_benefit DESC;
 
 
 -- Q20: Scheme-wise average priority score of approved applicants
--- fairness metric — are higher-priority (more vulnerable) citizens actually getting approved?
 SELECT s.scheme_name,
        ROUND(AVG(a.priority_score), 2) AS avg_priority_score,
        MIN(a.priority_score)           AS min_score,
@@ -1931,7 +1784,6 @@ ORDER BY avg_priority_score DESC;
 
 
 -- Q21: Monthly application submission trend
--- tracks seasonal surges in applications
 SELECT TO_CHAR(apply_date, 'YYYY-MM')            AS month,
        COUNT(*)                                   AS total_applications,
        SUM(CASE WHEN status = 'DISBURSED' THEN 1 ELSE 0 END) AS disbursed
@@ -1940,12 +1792,9 @@ GROUP BY TO_CHAR(apply_date, 'YYYY-MM')
 ORDER BY month;
 
 
--- ╔════════════════════════════════════════════╗
 -- ║  SECTION 4 — ADVANCED QUERIES (Q22–Q30)   ║
--- ╚════════════════════════════════════════════╝
 
 -- Q22: Citizens below their state average income who haven't applied anywhere
--- correlated subquery — primary targets for proactive outreach
 SELECT c.citizen_id, c.full_name, c.state,
        c.annual_income, c.category
 FROM Citizen c
@@ -1961,8 +1810,6 @@ ORDER BY c.annual_income ASC;
 
 
 -- Q23: Fraud detection — high income citizens on BPL schemes
--- income > 5L but applied for Kisan Samman, Gramin Awas, or Ujjwala
--- using scheme_code instead of hardcoded IDs so it works after any rebuild
 SELECT c.full_name, c.aadhaar_number, c.annual_income,
        c.category, s.scheme_name, a.status, a.apply_date
 FROM Application a
@@ -1993,7 +1840,6 @@ ORDER BY approval_rate_pct DESC;
 
 
 -- Q25: Top 5 schemes by total disbursement amount
--- shows the highest-reach schemes financially
 SELECT s.scheme_name,
        NVL(SUM(fd.amount), 0) AS total_disbursed
 FROM Scheme s
@@ -2005,7 +1851,6 @@ FETCH FIRST 5 ROWS ONLY;
 
 
 -- Q26: Unverified citizens with pending applications
--- compliance risk — applications in queue for citizens with unverified documents
 SELECT c.citizen_id, c.full_name, c.aadhaar_number,
        c.is_verified, a.application_id, s.scheme_name, a.status
 FROM Citizen c
@@ -2017,7 +1862,6 @@ ORDER BY a.apply_date ASC;
 
 
 -- Q27: Applications with no officer assigned yet
--- workload allocation — which applications are sitting unattended
 SELECT a.application_id, c.full_name,
        s.scheme_name, a.status, a.apply_date,
        TRUNC(SYSDATE - a.apply_date) AS days_unassigned
@@ -2041,7 +1885,6 @@ ORDER BY al.change_date ASC;
 
 
 -- Q29: Department-wise total budget and utilisation
--- ministry-level financial rollup
 SELECT d.department_name,
        COUNT(s.scheme_id)        AS total_schemes,
        SUM(sfp.total_budget)     AS total_budget,
@@ -2072,7 +1915,4 @@ LEFT JOIN Fund_Disbursement fd ON a.application_id = fd.application_id
 ORDER BY a.priority_score DESC, a.apply_date ASC;
 
 
--- ============================================================
---  END OF FILE
--- ============================================================
 COMMIT;
