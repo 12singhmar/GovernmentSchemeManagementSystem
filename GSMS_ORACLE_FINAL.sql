@@ -1,9 +1,5 @@
 -- ============================================================
 --  GOVERNMENT SCHEME MANAGEMENT SYSTEM
---  UCS310 - Database Management Systems
---  Group 4 | Thapar Institute of Engineering & Technology
---  Kavya Singal (1024030470)
---  Ipshita Singla (1024030473)
 --  Akshaj Singhmar (1024030493)
 --  Guide: Dr. Reaya Grewal
 -- ============================================================
